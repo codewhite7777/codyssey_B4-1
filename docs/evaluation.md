@@ -15,9 +15,9 @@
 | 1 | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "`, `sudo ss -tulnp \| grep sshd` | 항목 1-1, 3-1 |
 | 2 | `sudo ufw status verbose` | 항목 1-2 |
 | 3 | `id agent-admin`, `id agent-dev`, `id agent-test` | 항목 1-3 |
-| 4 | `ls -ld` + `getfacl` + `sudo -u agent-test cat .../t_secret.key` (거절) | 항목 1-3, 3-2 |
-| 5 | 터미널 1: agent-admin으로 앱 실행 → Boot 5단계 [OK], Agent READY | 항목 1-4 |
-| 6 | 터미널 2: `monitor.sh; echo "exit=$?"` → exit=0. 앱 Ctrl+C 후 다시 → exit=1 | 항목 1-5, 2-1, 3-3 |
+| 4 | `ls -ld` + `getfacl` + `sudo -u agent-test cat .../secret.key` (거절) | 항목 1-3, 3-2 |
+| 5 | 터미널 1: agent-admin으로 `./agent-app-linux-x86` 실행 → Boot 5단계 [OK], Agent READY (그 뒤 계속 나오는 줄은 앱이 CPU · 메모리를 쓰는 기록) | 항목 1-4 |
+| 6 | 터미널 2: `monitor.sh; echo "exit=$?"` → CPU 경고가 떠도 exit=0. `sudo ufw disable` 후 다시 → 방화벽 경고, exit=0 (`sudo ufw enable`로 복구). 앱 Ctrl+C 후 다시 → exit=1 | 항목 1-5, 2-1, 3-3 |
 | 7 | 앱 다시 실행 → `crontab -l`, `tail -f /var/log/agent-app/monitor.log` 로 1분마다 늘어나는 것 보기 | 항목 1-6, 1-7, 3-4 |
 | 8 | `cat /etc/logrotate.d/agent-app`, `sudo logrotate -f ...` 후 `ls -l /var/log/agent-app` | 항목 1-8, 2-4 |
 | 9 | 아래 항목 2~4 질문에 그림을 보며 답변 | 항목 2~4 |
@@ -32,7 +32,7 @@
 | 1-2 | 방화벽(UFW) 활성, 20022/tcp · 15034/tcp만 허용 | ✅ | `sudo ufw status verbose` → `Status: active`, 허용 2줄 | [README 2단계](../README.md#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) |
 | 1-3 | 계정 3개, 그룹 agent-common/core 구성 | ✅ | `id agent-test` → agent-common만 | [README 3단계](../README.md#3단계-계정--그룹-만들기), [4단계](../README.md#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) |
 | 1-4 | Boot Sequence 5단계 [OK], Agent READY | ✅ | 앱 실행 화면 + `ss -ltn \| grep 15034` | [README 6단계](../README.md#6단계-앱-실행-boot-sequence-5단계-ok) |
-| 1-5 | monitor.sh가 프로세스/포트 점검, 비정상 시 exit 1 | ✅ | 앱을 끄고 `monitor.sh; echo "exit=$?"` → `exit=1` | [README 7단계 실행 확인 4, 5](../README.md#7단계-monitorsh-만들기) |
+| 1-5 | monitor.sh가 프로세스/포트 점검, 비정상 시 exit 1 | ✅ | 앱을 끄고 `monitor.sh; echo "exit=$?"` → `exit=1` | [README 7단계 실행 확인 3, 4](../README.md#7단계-monitorsh-만들기) |
 | 1-6 | monitor.log가 지정 포맷으로 누적 | ✅ | `tail -5 /var/log/agent-app/monitor.log` | [README 8-1](../README.md#8-1-cron-등록-agent-admin의-crontab) |
 | 1-7 | cron 매분 실행으로 자동 증가 | ✅ | `crontab -l`, `wc -l` 1분 간격 비교 | [README 8-1](../README.md#8-1-cron-등록-agent-admin의-crontab) |
 | 1-8 | 용량관리(10MB/10개) 설정 + 동작 설명 | ✅ logrotate | `cat /etc/logrotate.d/agent-app` | [README 8-2](../README.md#8-2-logrotate로-10mb--10개-관리), 아래 그림 |
@@ -55,12 +55,17 @@
 
 | 무엇 | 쓴 명령 | 고른 이유 | 고르지 않은 것 |
 |---|---|---|---|
-| 프로세스 | `pgrep -o -f 'agent_app.py\|agent-app-linux'` | 결과가 **PID 숫자 하나**라서 비었는지만 보면 됨. `-f`로 명령줄 전체를 보니 `python3 agent_app.py`와 실행 파일 둘 다 찾음 | `ps aux \| grep` → grep 자기 자신이 걸려서 한 번 더 걸러야 함 |
+| 프로세스 | `pgrep -o -f '^[^ ]*agent-app-linux'` | 결과가 **PID 숫자 하나**라서 비었는지만 보면 됨. `^[^ ]*`로 명령줄의 **첫 단어**(실행된 프로그램)가 앱인 것만 찾음 → x86 · arm64 둘 다 찾고, 이름만 들어간 다른 프로세스는 안 걸림 | `ps aux \| grep` → grep 자기 자신이 걸려서 한 번 더 걸러야 함 |
 | 포트 | `ss -ltn` → 4번째 칸이 `:15034`로 끝나는 줄 | Ubuntu 기본 설치, `-l`(LISTEN만) `-t`(TCP만) `-n`(숫자로) 로 원하는 것만 나옴 | `netstat` → 기본 설치가 아니고(net-tools) 예전 도구 |
 
 > **말하기**: "앱이 살아 있는지는 pgrep으로 봤습니다. 결과가 PID 하나로 나와서 비어 있으면 죽은 것이고, 그 PID를 로그에도 그대로 씁니다. 포트는 ss -ltn으로 LISTEN 중인 TCP 포트만 보고, 주소 칸이 :15034로 끝나는 줄이 있는지 확인했습니다. 둘 중 하나라도 없으면 exit 1로 끝냅니다."
 
-> **주의한 점**: pgrep 패턴에 `agent-app`처럼 짧은 이름을 쓰면, monitor.sh의 경로(`/home/agent-admin/agent-app/bin/monitor.sh`)에도 같은 글자가 있어 **스크립트 자신이 앱으로 잡힙니다.** 그래서 `agent_app.py`, `agent-app-linux` 처럼 앱에만 있는 이름을 썼습니다.
+> **실제로 겪은 문제와 고친 점**
+> - 처음에는 `pgrep -f agent-app-linux`(명령줄 어디든 이름이 있으면 찾기)를 썼습니다. 그런데 앱을 띄운 셸 `bash -c "... ./agent-app-linux-x86 ..."`의 명령줄에도 같은 글자가 있어서, **앱이 아닌 셸의 PID**가 로그에 찍혔습니다. `vim agent-app-linux-x86`처럼 파일을 열어 둔 것도 앱으로 착각할 수 있습니다.
+> - 그래서 `^[^ ]*agent-app-linux`로 바꿔 **명령줄의 첫 단어가 앱인 것만** 찾게 했습니다. 고친 뒤 앱을 끄고 미끼 프로세스를 띄워 두어도 `[FAIL] exit=1`이 나오는 것을 확인했습니다. ([README 실행 확인 3](../README.md#7단계-monitorsh-만들기))
+> - `agent-app`처럼 더 짧은 이름은 monitor.sh의 경로(`/home/agent-admin/agent-app/bin/...`)에도 들어 있어서 피했습니다.
+>
+> **프로세스가 2개 보이는 이유**: 제공 앱은 PyInstaller 실행 파일이라 **부모가 압축을 풀고 자식이 실제로 일합니다.** `-o`(가장 먼저 뜬 것)로 부모 PID를 기록합니다. 자식이 죽으면 부모도 함께 끝나서, 부모만 봐도 앱이 살아 있는지 알 수 있습니다.
 
 ### 2-2. CPU · MEM · DISK 추출 방법, 로그 포맷을 고정한 이유
 
@@ -84,7 +89,7 @@
 **보여줄 곳**: `ls -l /home/agent-admin/agent-app/bin/monitor.sh`, [README 7단계 표](../README.md#7단계-monitorsh-만들기)
 
 ```console
--rwxr-x--- 1 agent-dev agent-core 4440 Oct 19 01:26 monitor.sh
+-rwxr-x--- 1 agent-dev agent-core 5108 Oct 26 23:02 monitor.sh
 ```
 
 | 칸 | 대상 | 결과 |
@@ -92,6 +97,15 @@
 | `rwx` 소유자 | agent-dev | 작성자라 수정 가능 |
 | `r-x` 그룹 | agent-core (admin 포함) | admin은 **읽고 실행만** → cron 실행 가능, 수정은 불가 |
 | `---` 그 외 | agent-test | 실행도 불가 (`Permission denied`) |
+
+**스크립트 안에서 root 권한이 필요한 곳**: 방화벽 상태(`ufw status`)는 root만 볼 수 있습니다. 실행자에게 root 전체를 주는 대신, [sudoers](../config/sudoers-agent-monitor)에 **agent-core 그룹 · `ufw status` 한 명령만** 비밀번호 없이 허용했습니다.
+
+```console
+$ cat /etc/sudoers.d/agent-monitor
+%agent-core ALL=(root) NOPASSWD: /usr/sbin/ufw status
+$ sudo -n /usr/sbin/ufw disable        # agent-admin이라도 다른 명령은 거절
+sudo: a password is required
+```
 
 > **말하기**: "만든 사람(dev)과 돌리는 사람(admin)을 나눴습니다. 소유자는 agent-dev, 그룹은 agent-core, 권한 750이라서 dev는 고칠 수 있고, admin은 agent-core 그룹이라 읽기·실행만 됩니다. 그래서 admin의 crontab이 이 파일을 실행할 수 있고, 운영 중에 실수로 스크립트를 바꾸는 일은 없습니다. bin 폴더도 agent-dev:agent-core 750이라 test는 폴더 안으로 들어갈 수조차 없습니다."
 
@@ -126,7 +140,8 @@
 
 > **말하기**: "최소 권한 원칙은 '일에 꼭 필요한 만큼만 권한을 준다'입니다. agent-test는 테스트 파일만 다루면 되니 upload_files만 있으면 됩니다.
 > api_keys가 새면 외부 서비스가 도용되고, 로그가 지워지거나 조작되면 장애나 침입의 원인을 찾을 수 없습니다. 그래서 운영을 책임지는 admin과 dev만 있는 agent-core로 막았습니다.
-> 이렇게 하면 test 계정이 실수하거나 탈취당해도 키와 로그까지는 피해가 번지지 않습니다. 실제로 test로 키를 읽으면 Permission denied가 나옵니다."
+> 이렇게 하면 test 계정이 실수하거나 탈취당해도 키와 로그까지는 피해가 번지지 않습니다. 실제로 test로 키를 읽으면 Permission denied가 나옵니다.
+> 같은 원칙을 sudo에도 적용했습니다. monitor.sh가 root 권한이 필요한 건 `ufw status` 한 줄뿐이라, 그 명령 하나만 허용했습니다."
 
 ### 3-3. '경고만 하고 종료하지 않는 항목'을 분리한 운영상 이유
 
@@ -171,11 +186,14 @@
 | 다른 프로그램이 15034를 차지 (포트 충돌) | `ss -ltnp \| grep 15034` → PID가 앱과 다름 |
 | 앱이 멈춤 (정지 · 무한 대기) | `ps -o pid,stat,etime -p <PID>` → stat이 T 등 |
 
-> **말하기**: "빠르고 흔한 원인부터 지웁니다. 먼저 앱이 남긴 출력을 보고, 다음은 포트 번호가 맞는지, 그다음 다른 프로그램이 그 포트를 쓰고 있는지, 마지막으로 앱이 멈춰 있는지 봅니다. 실제로 monitor.sh 테스트에서 프로세스는 있는데 포트를 안 연 경우 `[FAIL] not listening`과 exit 1이 나오는 것을 확인했습니다. ([README 실행 확인 5](../README.md#7단계-monitorsh-만들기))"
+> **말하기**: "빠르고 흔한 원인부터 지웁니다. 먼저 앱이 남긴 출력을 보고, 다음은 포트 번호가 맞는지, 그다음 다른 프로그램이 그 포트를 쓰고 있는지, 마지막으로 앱이 멈춰 있는지 봅니다. 실제로 monitor.sh 테스트에서 프로세스는 있는데 포트를 안 연 경우 `[FAIL] not listening`과 exit 1이 나오는 것을 확인했습니다. ([README 실행 확인 4](../README.md#7단계-monitorsh-만들기))"
 
 ### 4-3. 로그가 급증해 디스크가 가득 찰 위험: 단기 / 중기 대응
 
 ![디스크 가득](images/disk_full.svg)
+
+**테스트 환경에서 본 실제 예**: 같은 폴더의 앱 자체 로그(`agent_app.log`)는 **1분에 약 3.3KB** 늘었습니다. 하루 약 4.8MB입니다. monitor.log(하루 약 94KB)보다 50배 빠르고, 지금 logrotate 설정에는 monitor.log만 들어 있습니다.
+과제 요구는 monitor.log만이라 설정은 그대로 두었습니다. 운영한다면 첫 대응은 이 파일도 logrotate 설정에 한 줄 추가하는 것입니다.
 
 > **말하기**: "단기로는 먼저 `df -h`, `du -sh`로 무엇이 큰지 찾고, 지금 쓰고 있는 로그는 rm 대신 `: > 파일`로 비웁니다. 열려 있는 파일을 rm하면 프로세스가 계속 잡고 있어서 공간이 바로 돌아오지 않기 때문입니다. 오래된 .1~.10은 압축하거나 백업 후 지우고, 같은 에러가 반복되면 원인 프로세스를 재시작합니다.
 > 중기로는 logrotate 기준을 낮추거나 압축을 켜고, 로그를 별도 파티션으로 분리해 로그가 차도 시스템 전체가 멈추지 않게 합니다. monitor.sh의 DISK 80% 경고를 알림으로 연결하고, 근본적으로는 로그를 쏟아내는 코드를 고칩니다."

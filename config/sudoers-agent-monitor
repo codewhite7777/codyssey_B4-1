@@ -1,0 +1,4 @@
+# /etc/sudoers.d/agent-monitor 로 복사해서 사용 (권한 0440)
+# agent-core 그룹(admin, dev)은 비밀번호 없이 "ufw status" 한 가지만 root 권한으로 실행할 수 있다.
+# 인자까지 정확히 같아야 허용된다 (ufw disable, ufw status verbose 등은 불가).
+%agent-core ALL=(root) NOPASSWD: /usr/sbin/ufw status

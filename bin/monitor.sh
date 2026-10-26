@@ -16,7 +16,7 @@
 
 # ---------- 설정값 ----------
 # cron 은 ~/.bashrc 를 읽지 않아 환경변수가 비어 있을 수 있다 -> 기본값을 둔다
-APP_PATTERN="agent_app.py|agent-app-linux"   # 찾을 앱 이름 (파이썬 파일 또는 제공 실행 파일)
+APP_NAME="agent-app-linux"                    # 제공 앱 파일 이름 (x86, arm64 둘 다 이 이름으로 시작)
 APP_PORT="${AGENT_PORT:-15034}"
 LOG_DIR="${AGENT_LOG_DIR:-/var/log/agent-app}"
 LOG_FILE="$LOG_DIR/monitor.log"
@@ -36,14 +36,18 @@ echo
 echo "[HEALTH CHECK]"
 
 # ---------- 1. 프로세스 확인 ----------
-# pgrep -f : 실행 명령줄 전체에서 이름을 찾는다 (python3 agent_app.py 처럼 뒤에 붙은 이름도 찾음)
+# pgrep -f : 실행 명령줄(예: ./agent-app-linux-x86)에서 찾는다
+#   패턴 '^[^ ]*agent-app-linux' = 명령줄의 "첫 단어"(실제로 실행된 프로그램)가 앱인 것만
+#   -> 'vim agent-app-linux-x86', 'bash -c "./agent-app-linux-x86"' 처럼
+#      명령줄 중간에 이름만 들어 있는 다른 프로세스는 걸리지 않는다
 # pgrep -o : 여러 개면 가장 먼저 뜬 것 하나의 PID
-PID=$(pgrep -o -f "$APP_PATTERN")
+#   (제공 앱은 PyInstaller 실행 파일이라 프로세스가 2개 뜬다: 부모가 압축을 풀고 자식이 실제로 일함)
+PID=$(pgrep -o -f "^[^ ]*${APP_NAME}")
 if [ -z "$PID" ]; then
-    echo "Checking process '$APP_PATTERN'... [FAIL] not running"
+    echo "Checking process '$APP_NAME'... [FAIL] not running"
     exit 1
 fi
-echo "Checking process '$APP_PATTERN'... [OK] (PID: $PID)"
+echo "Checking process '$APP_NAME'... [OK] (PID: $PID)"
 
 # ---------- 2. 포트 확인 ----------
 # ss -ltn : LISTEN 중인(l) TCP(t) 소켓을 숫자로(n) 보여준다
@@ -55,9 +59,12 @@ fi
 echo "Checking port $APP_PORT... [OK]"
 
 # ---------- 3. 방화벽 확인 (경고만) ----------
-# 'ufw status' 는 root 만 실행할 수 있다. cron 은 agent-admin 으로 돌기 때문에
-# 누구나 읽을 수 있는 설정 파일의 ENABLED 값을 본다. (ufw enable/disable 이 이 값을 바꾼다)
-if grep -q "^ENABLED=yes" /etc/ufw/ufw.conf 2>/dev/null; then
+# 'ufw status' 는 root 만 실행할 수 있어서 sudo 로 실행한다.
+# /etc/sudoers.d/agent-monitor 에서 agent-core 그룹에게 "ufw status" 한 가지만 허용해 두었다.
+#   sudo -n : 비밀번호를 묻지 않는다 (cron 에는 입력할 사람이 없음. 허용 안 됐으면 바로 실패 -> 경고)
+# 설정 파일(/etc/ufw/ufw.conf)의 ENABLED=yes 는 "켜기로 설정됨"일 뿐이라,
+# 규칙이 실제로 올라가 있는지는 ufw status 로 봐야 정확하다.
+if sudo -n /usr/sbin/ufw status 2>/dev/null | grep -q "^Status: active"; then
     echo "Checking firewall (ufw)... [OK] active"
 else
     echo "[WARNING] Firewall (ufw) is not active"
