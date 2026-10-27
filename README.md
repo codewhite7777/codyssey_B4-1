@@ -4,7 +4,7 @@
 |---|---|---|---|
 | AI/SW 기초 | Linux와 OS | 40시간 | 필수 |
 
-**환경: Ubuntu 22.04 LTS (VM) / 방화벽: UFW / 범위: 필수 요구사항만 (보너스 제외)**
+**환경: Ubuntu Server 22.04 LTS (Mac M칩 + UTM VM, arm64) / 방화벽: UFW / 범위: 필수 요구사항만 (보너스 제외)**
 
 이 README가 **요구사항 수행 내역서**입니다. 세 부분으로 되어 있습니다.
 
@@ -145,7 +145,7 @@ ssh: connect to host localhost port 22: Connection refused
 | `sshd -T` | sshd가 **실제로 쓰는** 최종 값 (다른 설정 파일에 덮여 있지 않은지) |
 | `ss -tulnp` | sshd가 정말 **20022에서 기다리는지(LISTEN)** |
 
-> VM을 쓰면 호스트 → VM 포트 포워딩도 22 대신 **20022**로 바꿔야 밖에서 접속됩니다.
+> Mac에서 VM으로 접속할 때는 `ssh -p 20022 내계정@VM주소` 처럼 포트를 붙입니다. (UTM 기본 네트워크는 Mac에서 VM 주소로 바로 접속되므로 포트 포워딩이 필요 없습니다. VirtualBox의 NAT를 쓴다면 포트 포워딩을 22 대신 **20022**로 바꿉니다.)
 
 ---
 
@@ -385,12 +385,16 @@ $ ls -l $AGENT_KEY_PATH
 **개념**: 앱은 **일반 계정(agent-admin)** 으로 실행합니다. root로 실행한 앱에 구멍이 있으면 공격자가 곧바로 root 권한을 얻기 때문입니다.
 
 ```bash
-# agent-admin 상태에서
-uname -m                          # x86_64 → agent-app-linux-x86, aarch64 → agent-app-linux-arm64 (Apple 실리콘 VM)
+# 1) 내 계정에서: 받은 파일을 AGENT_HOME으로 옮기기 (zip이면 unzip 먼저)
+uname -m                          # aarch64 → agent-app-linux-arm64 (Mac M칩 VM), x86_64 → agent-app-linux-x86
+APP=agent-app-linux-arm64         # x86_64면 agent-app-linux-x86
+sudo install -o agent-admin -g agent-admin -m 750 ~/$APP /home/agent-admin/agent-app/$APP
+#   agent-admin은 내 홈 폴더를 읽을 수 없어서, sudo로 복사하면서 소유자와 실행 권한을 한 번에 준다
+
+# 2) agent-admin으로 바꿔서 실행
+sudo -iu agent-admin
 cd $AGENT_HOME
-cp ~/agent-app-linux-x86 .        # 받은 파일을 AGENT_HOME으로 (zip이면 unzip 먼저)
-chmod +x agent-app-linux-x86
-./agent-app-linux-x86             # 이 터미널은 앱이 계속 돌도록 켜 둔다 (종료는 Ctrl+C)
+./agent-app-linux-arm64           # 이 터미널은 앱이 계속 돌도록 켜 둔다 (종료는 Ctrl+C)
 ```
 
 **확인** (제공 앱 실제 출력)
