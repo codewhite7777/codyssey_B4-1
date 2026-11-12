@@ -237,9 +237,11 @@ $ ssh -p 22 agent-admin@localhost      # 옛 포트는 닫힘
 ssh: connect to host localhost port 22: Connection refused
 ```
 
-**📸 내 VM 실제 화면 (증거 1)**: 적용된 설정 `port 20022`, `permitrootlogin no`와 sshd가 20022번에서 LISTEN 중인 모습
+**📸 내 VM 실제 화면 (증거 1)**
 
-![증거 1: sshd 설정과 20022 LISTEN](docs/images/evidence/01_ssh_config.png)
+1-1. sshd가 실제로 적용 중인 규칙: `port 20022`, `permitrootlogin no`
+
+![증거 1-1: sshd 적용 규칙](docs/images/evidence/1-1_sshd_rules.png)
 
 | 확인 방법 | 무엇을 보나 |
 |---|---|
@@ -794,7 +796,7 @@ $ cat /var/log/agent-app/monitor.log
 
 | # | 요구 증거 | 확인 명령 | 이 문서에서 | 내 VM 화면 |
 |---|---|---|---|---|
-| 1 | SSH 포트 20022, root 원격 접속 차단 | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "`, `sudo ss -tulnp \| grep sshd`, `ssh -p 20022 root@localhost` | [1단계](#1단계-ssh-잠그기-포트-20022-root-원격-접속-차단) | ✅ [01](docs/images/evidence/01_ssh_config.png) |
+| 1 | SSH 포트 20022, root 원격 접속 차단 | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "`, `sudo ss -tulnp \| grep sshd`, `ssh -p 20022 root@localhost` | [1단계](#1단계-ssh-잠그기-포트-20022-root-원격-접속-차단) | 🔶 [1-1](docs/images/evidence/1-1_sshd_rules.png) (1-2 LISTEN, 1-3 root 거절 남음) |
 | 2 | UFW 활성화, 20022/tcp · 15034/tcp만 허용 | `sudo ufw status verbose` | [2단계](#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) | ⬜ |
 | 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) | ⬜ |
 | 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | ⬜ |
