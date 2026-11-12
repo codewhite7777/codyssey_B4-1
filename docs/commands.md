@@ -210,4 +210,7 @@ cd $AGENT_HOME
 
 # [VM: agent-admin] 📸 6 앱 실행 → Boot 5단계 [OK], Agent READY (이 창은 켜 둠, 종료는 Ctrl+C)
 ./agent-app-linux-x86
+
+# [Mac] 새 탭에서 다시 접속 (탭 1 = 앱 실행 중, 탭 2 = 작업용)
+ssh -p 20022 arang@192.168.64.2
 ```
