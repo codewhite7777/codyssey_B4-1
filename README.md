@@ -540,6 +540,10 @@ $ ls -l $AGENT_KEY_PATH
 
 ![증거 5-1: 환경변수 5개](docs/images/evidence/5-1_env.png)
 
+**📸 내 VM 실제 화면 (증거 5-2)**: 키 파일 2개, 권한 `660`, 그룹은 폴더의 setgid로 자동으로 `agent-core`
+
+![증거 5-2: 키 파일 권한](docs/images/evidence/5-2_keys.png)
+
 > **알아두기**: Ubuntu의 `~/.bashrc`는 맨 위에서 "사람이 직접 쓰는 셸이 아니면 읽지 않고 끝" 하도록 되어 있습니다.
 > 그래서 **cron에서는 이 환경변수가 비어 있습니다.** monitor.sh가 `${AGENT_PORT:-15034}`처럼 **기본값**을 둔 이유입니다. ([7단계](#7단계-monitorsh-만들기))
 

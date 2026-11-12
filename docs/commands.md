@@ -161,7 +161,7 @@ sudo -u agent-test ls /var/log/agent-app                                        
 sudo -u agent-dev ls -la /home/agent-admin/agent-app/api_keys                      # dev는 비밀 폴더 통과 (📸 4-2 test 거절, 4-3 dev 통과)
 ```
 
-## 5단계. 환경변수 + 키 파일 (진행 중)
+## 5단계. 환경변수 + 키 파일
 
 ```bash
 # [VM] agent-admin으로 바꾸기 (프롬프트가 agent-admin@b4-1로 바뀜, 이후 sudo 없음)
@@ -188,4 +188,8 @@ cat $AGENT_KEY_PATH/secret.key
 
 # [VM: agent-admin] 과제 문서에 적힌 이름도 같은 내용으로 (앱은 읽지 않음)
 echo "agent_api_key_test" > $AGENT_KEY_PATH/t_secret.key
+
+# [VM: agent-admin] 키 파일 권한 660 → 📸 5-2 확인
+chmod 660 $AGENT_KEY_PATH/*.key
+ls -l $AGENT_KEY_PATH
 ```
