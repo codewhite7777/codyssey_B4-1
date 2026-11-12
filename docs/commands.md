@@ -115,4 +115,6 @@ getfacl /home/agent-admin
 
 # [VM] 앱 폴더(AGENT_HOME): 주인 agent-admin, 그룹 agent-common
 sudo chown agent-admin:agent-common /home/agent-admin/agent-app
+sudo chmod 750 /home/agent-admin/agent-app
+sudo ls -ld /home/agent-admin/agent-app
 ```
