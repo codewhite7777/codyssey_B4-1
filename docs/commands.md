@@ -122,4 +122,9 @@ sudo ls -ld /home/agent-admin/agent-app
 sudo chown agent-admin:agent-common /home/agent-admin/agent-app/upload_files
 sudo chmod 2770 /home/agent-admin/agent-app/upload_files
 sudo ls -ld /home/agent-admin/agent-app/upload_files
+
+# [VM] 공용 폴더 기본 ACL: 앞으로 생길 파일도 agent-common이 읽기·쓰기
+sudo setfacl -d -m g:agent-common:rwx /home/agent-admin/agent-app/upload_files
+getfacl /home/agent-admin/agent-app/upload_files        # arang은 "나머지"라 Permission denied (정상)
+sudo getfacl /home/agent-admin/agent-app/upload_files
 ```
