@@ -472,6 +472,12 @@ agent_api_key_test
 | agent-dev | ✅ | ✅ | ✅ |
 | agent-test | ✅ | ❌ Permission denied | ❌ Permission denied |
 
+**📸 내 VM 실제 화면 (증거 4-2, 4-3)**: 같은 비밀 폴더(`api_keys`)인데 **test는 거절, dev는 통과**
+
+![증거 4-2: agent-test는 api_keys 거절](docs/images/evidence/4-2_test_denied.png)
+
+![증거 4-3: agent-dev는 api_keys 통과](docs/images/evidence/4-3_dev_allowed.png)
+
 ---
 
 ### 5단계. 환경변수 + 키 파일
@@ -850,7 +856,7 @@ $ cat /var/log/agent-app/monitor.log
 | 1 | SSH 포트 20022, root 원격 접속 차단 | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "`, `sudo ss -tulnp \| grep sshd`, `ssh -p 20022 root@localhost` | [1단계](#1단계-ssh-잠그기-포트-20022-root-원격-접속-차단) | ✅ [1-1](docs/images/evidence/1-1_sshd_rules.png) · [1-2](docs/images/evidence/1-2_sshd_listen.png) · [1-3](docs/images/evidence/1-3_root_denied.png) |
 | 2 | UFW 활성화, 20022/tcp · 15034/tcp만 허용 | `sudo ufw status verbose` | [2단계](#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) | ✅ [2](docs/images/evidence/2_ufw_status.png) |
 | 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) | ✅ [3](docs/images/evidence/3_id_groups.png) |
-| 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | 🔶 [4-1](docs/images/evidence/4-1_dirs.png) (4-2 접근 테스트 남음) |
+| 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | ✅ [4-1](docs/images/evidence/4-1_dirs.png) · [4-2](docs/images/evidence/4-2_test_denied.png) · [4-3](docs/images/evidence/4-3_dev_allowed.png) |
 | 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) | ⬜ |
 | 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) | ⬜ |
 | 7 | monitor.log 누적 (최근 라인) | `tail -5 /var/log/agent-app/monitor.log` | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |

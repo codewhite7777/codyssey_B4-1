@@ -102,7 +102,7 @@ id agent-dev
 id agent-test
 ```
 
-## 4단계. 폴더 · 권한 정하기 (진행 중)
+## 4단계. 폴더 · 권한 정하기
 
 ```bash
 # [VM] 폴더 만들기 → 확인 (처음에는 주인이 root)
@@ -158,4 +158,5 @@ sudo ls -ld /home/agent-admin/agent-app /home/agent-admin/agent-app/upload_files
 sudo -u agent-test touch /home/agent-admin/agent-app/upload_files/from-test.txt    # 공용 폴더 쓰기: 성공
 sudo -u agent-test ls /home/agent-admin/agent-app/api_keys                         # 비밀 폴더: Permission denied
 sudo -u agent-test ls /var/log/agent-app                                           # 로그 폴더: Permission denied
+sudo -u agent-dev ls -la /home/agent-admin/agent-app/api_keys                      # dev는 비밀 폴더 통과 (📸 4-2 test 거절, 4-3 dev 통과)
 ```
