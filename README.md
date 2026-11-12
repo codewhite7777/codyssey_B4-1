@@ -21,6 +21,7 @@
 | 함께 보는 파일 | 내용 |
 |---|---|
 | [docs/evaluation.md](docs/evaluation.md) | **평가표 항목 1~4 정리** (질문마다 보여줄 곳, 그림, 말하기 예시) |
+| [docs/commands.md](docs/commands.md) | **명령어 기록**: 내 VM에서 실제로 실행한 명령을 순서대로 |
 | [bin/monitor.sh](bin/monitor.sh) | 자동화 스크립트 소스코드 (Bash) |
 | [config/logrotate-agent-app](config/logrotate-agent-app) | 로그 용량 관리 설정 (10MB / 10개) |
 | [config/sudoers-agent-monitor](config/sudoers-agent-monitor) | monitor.sh가 방화벽 상태를 볼 수 있게 `ufw status`만 허용 |
@@ -850,5 +851,6 @@ codyssey_B4-1/
 │   └── sudoers-agent-monitor    ← /etc/sudoers.d/agent-monitor 로 복사
 └── docs/
     ├── evaluation.md            ← 평가표 항목 1~4 정리
+    ├── commands.md              ← 내 VM에서 실제로 실행한 명령 기록
     └── images/                  ← 설명 그림 (SVG, 직접 제작)
 ```
