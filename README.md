@@ -294,6 +294,10 @@ To                         Action      From
 
 (IPv6가 켜진 환경이면 같은 규칙이 `(v6)`로 한 번 더 보입니다. 정상입니다.)
 
+**📸 내 VM 실제 화면 (증거 2)**: `Status: active`, `Default: deny (incoming)`, 허용 목록에 20022 · 15034만
+
+![증거 2: UFW 상태](docs/images/evidence/2_ufw_status.png)
+
 ---
 
 ### 3단계. 계정 · 그룹 만들기
@@ -805,7 +809,7 @@ $ cat /var/log/agent-app/monitor.log
 | # | 요구 증거 | 확인 명령 | 이 문서에서 | 내 VM 화면 |
 |---|---|---|---|---|
 | 1 | SSH 포트 20022, root 원격 접속 차단 | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "`, `sudo ss -tulnp \| grep sshd`, `ssh -p 20022 root@localhost` | [1단계](#1단계-ssh-잠그기-포트-20022-root-원격-접속-차단) | ✅ [1-1](docs/images/evidence/1-1_sshd_rules.png) · [1-2](docs/images/evidence/1-2_sshd_listen.png) · [1-3](docs/images/evidence/1-3_root_denied.png) |
-| 2 | UFW 활성화, 20022/tcp · 15034/tcp만 허용 | `sudo ufw status verbose` | [2단계](#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) | ⬜ |
+| 2 | UFW 활성화, 20022/tcp · 15034/tcp만 허용 | `sudo ufw status verbose` | [2단계](#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) | ✅ [2](docs/images/evidence/2_ufw_status.png) |
 | 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) | ⬜ |
 | 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | ⬜ |
 | 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) | ⬜ |
