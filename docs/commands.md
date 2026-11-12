@@ -199,4 +199,8 @@ ls -l $AGENT_KEY_PATH
 ```bash
 # [VM: agent-admin] arang으로 돌아가기
 exit
+
+# [VM: arang] 앱 파일을 AGENT_HOME으로 (복사 + 주인 agent-admin + 권한 750) → 확인
+sudo install -o agent-admin -g agent-admin -m 750 ~/agent-app-linux-x86 /home/agent-admin/agent-app/agent-app-linux-x86
+sudo ls -l /home/agent-admin/agent-app
 ```
