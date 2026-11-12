@@ -193,3 +193,10 @@ echo "agent_api_key_test" > $AGENT_KEY_PATH/t_secret.key
 chmod 660 $AGENT_KEY_PATH/*.key
 ls -l $AGENT_KEY_PATH
 ```
+
+## 6단계. 앱 실행 (진행 중)
+
+```bash
+# [VM: agent-admin] arang으로 돌아가기
+exit
+```
