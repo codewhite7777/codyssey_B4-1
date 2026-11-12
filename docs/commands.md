@@ -153,4 +153,7 @@ sudo getfacl /var/log/agent-app
 
 # [VM] 📸 4-1 폴더 5개 한눈에
 sudo ls -ld /home/agent-admin/agent-app /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /home/agent-admin/agent-app/bin /var/log/agent-app
+
+# [VM] 계정별 접근 시험 (sudo -u 계정 = 그 계정 권한으로 실행)
+sudo -u agent-test touch /home/agent-admin/agent-app/upload_files/from-test.txt    # 공용 폴더 쓰기: 성공
 ```
