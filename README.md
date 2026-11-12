@@ -237,6 +237,10 @@ $ ssh -p 22 agent-admin@localhost      # 옛 포트는 닫힘
 ssh: connect to host localhost port 22: Connection refused
 ```
 
+**📸 내 VM 실제 화면 (증거 1)**: 적용된 설정 `port 20022`, `permitrootlogin no`와 sshd가 20022번에서 LISTEN 중인 모습
+
+![증거 1: sshd 설정과 20022 LISTEN](docs/images/evidence/01_ssh_config.png)
+
 | 확인 방법 | 무엇을 보나 |
 |---|---|
 | `grep` | 설정 **파일**에 적힌 값 |
@@ -786,18 +790,18 @@ $ cat /var/log/agent-app/monitor.log
 
 ## 증거 자료 체크리스트
 
-과제가 요구한 증거 8개입니다. 본인 VM에서 **확인 명령**을 실행한 화면을 캡처하면 됩니다.
+과제가 요구한 증거 8개입니다. 본인 VM(교육장 iMac + UTM, Ubuntu 22.04 x86_64)에서 **확인 명령**을 실행한 화면을 `docs/images/evidence/`에 모았습니다.
 
-| # | 요구 증거 | 확인 명령 | 이 문서에서 |
-|---|---|---|---|
-| 1 | SSH 포트 20022, root 원격 접속 차단 | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "`, `sudo ss -tulnp \| grep sshd`, `ssh -p 20022 root@localhost` | [1단계](#1단계-ssh-잠그기-포트-20022-root-원격-접속-차단) |
-| 2 | UFW 활성화, 20022/tcp · 15034/tcp만 허용 | `sudo ufw status verbose` | [2단계](#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) |
-| 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) |
-| 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) |
-| 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) |
-| 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) |
-| 7 | monitor.log 누적 (최근 라인) | `tail -5 /var/log/agent-app/monitor.log` | [8-1](#8-1-cron-등록-agent-admin의-crontab) |
-| 8 | crontab 매분 등록 + 1분 후 증가 | `crontab -l`, `wc -l` 전후 비교 | [8-1](#8-1-cron-등록-agent-admin의-crontab) |
+| # | 요구 증거 | 확인 명령 | 이 문서에서 | 내 VM 화면 |
+|---|---|---|---|---|
+| 1 | SSH 포트 20022, root 원격 접속 차단 | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "`, `sudo ss -tulnp \| grep sshd`, `ssh -p 20022 root@localhost` | [1단계](#1단계-ssh-잠그기-포트-20022-root-원격-접속-차단) | ✅ [01](docs/images/evidence/01_ssh_config.png) |
+| 2 | UFW 활성화, 20022/tcp · 15034/tcp만 허용 | `sudo ufw status verbose` | [2단계](#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) | ⬜ |
+| 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) | ⬜ |
+| 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | ⬜ |
+| 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) | ⬜ |
+| 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) | ⬜ |
+| 7 | monitor.log 누적 (최근 라인) | `tail -5 /var/log/agent-app/monitor.log` | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |
+| 8 | crontab 매분 등록 + 1분 후 증가 | `crontab -l`, `wc -l` 전후 비교 | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |
 
 ---
 
