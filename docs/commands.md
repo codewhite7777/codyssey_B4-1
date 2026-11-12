@@ -141,4 +141,7 @@ sudo ls -ld /home/agent-admin/agent-app/api_keys
 sudo chown agent-dev:agent-core /home/agent-admin/agent-app/bin
 sudo chmod 750 /home/agent-admin/agent-app/bin
 sudo ls -ld /home/agent-admin/agent-app/bin
+
+# [VM] 로그 폴더: 주인 agent-admin, 그룹 agent-core
+sudo chown agent-admin:agent-core /var/log/agent-app
 ```
