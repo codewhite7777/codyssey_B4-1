@@ -86,4 +86,7 @@ sudo ufw status verbose
 sudo useradd -m -s /bin/bash agent-admin
 sudo useradd -m -s /bin/bash agent-dev
 sudo useradd -m -s /bin/bash agent-test
+
+# [VM] 그룹 만들기
+sudo groupadd agent-common
 ```
