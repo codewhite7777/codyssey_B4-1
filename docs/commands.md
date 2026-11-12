@@ -101,3 +101,11 @@ id agent-admin
 id agent-dev
 id agent-test
 ```
+
+## 4단계. 폴더 · 권한 정하기 (진행 중)
+
+```bash
+# [VM] 폴더 만들기 → 확인 (처음에는 주인이 root)
+sudo mkdir -p /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /home/agent-admin/agent-app/bin /var/log/agent-app
+sudo ls -l /home/agent-admin/agent-app
+```
