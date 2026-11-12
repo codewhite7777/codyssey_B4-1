@@ -203,4 +203,8 @@ exit
 # [VM: arang] 앱 파일을 AGENT_HOME으로 (복사 + 주인 agent-admin + 권한 750) → 확인
 sudo install -o agent-admin -g agent-admin -m 750 ~/agent-app-linux-x86 /home/agent-admin/agent-app/agent-app-linux-x86
 sudo ls -l /home/agent-admin/agent-app
+
+# [VM: arang] agent-admin으로 바꾸고 AGENT_HOME으로 이동
+sudo -iu agent-admin
+cd $AGENT_HOME
 ```
