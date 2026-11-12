@@ -94,4 +94,5 @@ sudo groupadd agent-core
 # [VM] 그룹에 넣기 (admin, dev → 두 그룹 / test → common만)
 sudo usermod -aG agent-common,agent-core agent-admin
 sudo usermod -aG agent-common,agent-core agent-dev
+sudo usermod -aG agent-common agent-test
 ```
