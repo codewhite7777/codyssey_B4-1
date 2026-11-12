@@ -177,4 +177,8 @@ export AGENT_UPLOAD_DIR=$AGENT_HOME/upload_files
 export AGENT_KEY_PATH=$AGENT_HOME/api_keys
 export AGENT_LOG_DIR=/var/log/agent-app
 EOF
+
+# [VM: agent-admin] 지금 창에 적용 → 📸 5-1 확인
+source ~/.bashrc
+env | grep ^AGENT_ | sort
 ```

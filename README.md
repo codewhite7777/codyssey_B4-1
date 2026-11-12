@@ -536,6 +536,10 @@ $ ls -l $AGENT_KEY_PATH
 -rw-rw---- 1 agent-admin agent-core 19 Oct 19 01:24 t_secret.key
 ```
 
+**📸 내 VM 실제 화면 (증거 5-1)**: `env | grep ^AGENT_ | sort` 결과, 환경변수 5개 (`AGENT_KEY_PATH`는 폴더)
+
+![증거 5-1: 환경변수 5개](docs/images/evidence/5-1_env.png)
+
 > **알아두기**: Ubuntu의 `~/.bashrc`는 맨 위에서 "사람이 직접 쓰는 셸이 아니면 읽지 않고 끝" 하도록 되어 있습니다.
 > 그래서 **cron에서는 이 환경변수가 비어 있습니다.** monitor.sh가 `${AGENT_PORT:-15034}`처럼 **기본값**을 둔 이유입니다. ([7단계](#7단계-monitorsh-만들기))
 
