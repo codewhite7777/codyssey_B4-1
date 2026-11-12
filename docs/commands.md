@@ -185,4 +185,7 @@ env | grep ^AGENT_ | sort
 # [VM: agent-admin] 키 파일 (앱이 읽는 이름: secret.key) → 내용 확인
 echo "agent_api_key_test" > $AGENT_KEY_PATH/secret.key
 cat $AGENT_KEY_PATH/secret.key
+
+# [VM: agent-admin] 과제 문서에 적힌 이름도 같은 내용으로 (앱은 읽지 않음)
+echo "agent_api_key_test" > $AGENT_KEY_PATH/t_secret.key
 ```
