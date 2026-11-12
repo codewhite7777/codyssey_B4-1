@@ -117,4 +117,7 @@ getfacl /home/agent-admin
 sudo chown agent-admin:agent-common /home/agent-admin/agent-app
 sudo chmod 750 /home/agent-admin/agent-app
 sudo ls -ld /home/agent-admin/agent-app
+
+# [VM] 공용 폴더(upload_files): 주인 agent-admin, 그룹 agent-common
+sudo chown agent-admin:agent-common /home/agent-admin/agent-app/upload_files
 ```
