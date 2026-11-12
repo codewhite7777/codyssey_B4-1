@@ -79,7 +79,7 @@ sudo ufw enable
 sudo ufw status verbose
 ```
 
-## 3단계. 계정 · 그룹 만들기 (진행 중)
+## 3단계. 계정 · 그룹 만들기
 
 ```bash
 # [VM] 계정 만들기
@@ -95,4 +95,9 @@ sudo groupadd agent-core
 sudo usermod -aG agent-common,agent-core agent-admin
 sudo usermod -aG agent-common,agent-core agent-dev
 sudo usermod -aG agent-common agent-test
+
+# [VM] 📸 3 확인
+id agent-admin
+id agent-dev
+id agent-test
 ```

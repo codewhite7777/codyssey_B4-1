@@ -358,6 +358,12 @@ $ id agent-test
 uid=30035(agent-test) gid=30035(agent-test) groups=30035(agent-test),30036(agent-common)
 ```
 
+**📸 내 VM 실제 화면 (증거 3)**: admin · dev는 agent-common과 agent-core, test는 agent-common만
+
+![증거 3: id로 본 계정과 그룹](docs/images/evidence/3_id_groups.png)
+
+> `groups=` 맨 앞의 같은 이름 그룹(`agent-admin` 등)은 계정을 만들 때 자동으로 생긴 **개인 그룹**입니다. 그래서 시스템에는 그룹이 5개(개인 그룹 3 + 만든 그룹 2) 있지만, 이 과제에서 만들고 권한에 쓰는 그룹은 **agent-common, agent-core 2개**입니다.
+
 ---
 
 ### 4단계. 폴더 · 권한 정하기 (공유 폴더 vs 보안 폴더)
@@ -831,7 +837,7 @@ $ cat /var/log/agent-app/monitor.log
 |---|---|---|---|---|
 | 1 | SSH 포트 20022, root 원격 접속 차단 | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "`, `sudo ss -tulnp \| grep sshd`, `ssh -p 20022 root@localhost` | [1단계](#1단계-ssh-잠그기-포트-20022-root-원격-접속-차단) | ✅ [1-1](docs/images/evidence/1-1_sshd_rules.png) · [1-2](docs/images/evidence/1-2_sshd_listen.png) · [1-3](docs/images/evidence/1-3_root_denied.png) |
 | 2 | UFW 활성화, 20022/tcp · 15034/tcp만 허용 | `sudo ufw status verbose` | [2단계](#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) | ✅ [2](docs/images/evidence/2_ufw_status.png) |
-| 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) | ⬜ |
+| 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) | ✅ [3](docs/images/evidence/3_id_groups.png) |
 | 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | ⬜ |
 | 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) | ⬜ |
 | 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) | ⬜ |
