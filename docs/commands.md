@@ -89,4 +89,5 @@ sudo useradd -m -s /bin/bash agent-test
 
 # [VM] 그룹 만들기
 sudo groupadd agent-common
+sudo groupadd agent-core
 ```
