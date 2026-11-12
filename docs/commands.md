@@ -139,4 +139,6 @@ sudo ls -ld /home/agent-admin/agent-app/api_keys
 
 # [VM] bin 폴더: 주인 agent-dev(monitor.sh 작성자), 그룹 agent-core
 sudo chown agent-dev:agent-core /home/agent-admin/agent-app/bin
+sudo chmod 750 /home/agent-admin/agent-app/bin
+sudo ls -ld /home/agent-admin/agent-app/bin
 ```
