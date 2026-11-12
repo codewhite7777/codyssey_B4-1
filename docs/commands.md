@@ -90,4 +90,7 @@ sudo useradd -m -s /bin/bash agent-test
 # [VM] 그룹 만들기
 sudo groupadd agent-common
 sudo groupadd agent-core
+
+# [VM] 그룹에 넣기 (admin, dev → 두 그룹 / test → common만)
+sudo usermod -aG agent-common,agent-core agent-admin
 ```

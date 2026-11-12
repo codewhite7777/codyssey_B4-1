@@ -305,15 +305,35 @@ To                         Action      From
 
 ![계정과 그룹](docs/images/users_groups.svg)
 
-**개념**: 권한을 사람마다 따로 주면 사람이 늘 때마다 실수가 생깁니다. 그래서 **그룹에 권한을 주고, 사람을 그룹에 넣습니다.**
-`agent-core`(비밀 · 운영)는 `agent-common`(공용) 안에 있는 더 좁은 그룹입니다.
+**개념: 계정과 그룹은 무엇이 다른가**
+
+| | 계정 | 그룹 |
+|---|---|---|
+| 무엇 | **사람 한 명** | **사람들의 명단** |
+| 로그인 | 할 수 있음 (아이디, 비밀번호, 홈 폴더) | 못 함 |
+| 이 과제 | agent-admin, agent-dev, agent-test | agent-common, agent-core |
+
+**왜 그룹이 필요한가**: 리눅스는 파일마다 권한 칸이 **[주인 1명] [그룹 1개] [나머지 모두]** 3칸뿐입니다.
+주인 칸에는 한 명만 들어가므로 "admin과 dev 둘 다, 하지만 test는 빼고"를 하려면 **둘이 들어 있는 그룹을 그룹 칸에** 넣어야 합니다.
+그룹 없이 "나머지" 칸을 열면 test까지 같이 들어옵니다. 사람이 늘어도 그룹에 넣기만 하면 같은 권한을 받으니 관리도 쉽습니다.
+
+**누가 어느 그룹에 들어가나**
+
+| 계정 | agent-common (공용) | agent-core (핵심) | 넣는 명령 |
+|---|---|---|---|
+| agent-admin | ✅ | ✅ | `sudo usermod -aG agent-common,agent-core agent-admin` |
+| agent-dev | ✅ | ✅ | `sudo usermod -aG agent-common,agent-core agent-dev` |
+| agent-test | ✅ | ❌ | `sudo usermod -aG agent-common agent-test` |
+
+- **그룹에는 상하 관계가 없습니다.** core에 넣었다고 common에 자동으로 들어가지 않으므로, admin과 dev는 두 그룹에 **각각** 넣습니다.
+- 계정을 만들면 **같은 이름의 개인 그룹**(예: `agent-admin` 그룹)이 자동으로 생깁니다. 본인만 들어 있는 그룹이라 이 과제에서는 신경 쓰지 않습니다. 이 과제의 그룹은 common과 core **두 개뿐**입니다.
 
 ```bash
 # 계정 3개 (-m: 홈 폴더 생성, -s: 기본 셸)
 sudo useradd -m -s /bin/bash agent-admin
 sudo useradd -m -s /bin/bash agent-dev
 sudo useradd -m -s /bin/bash agent-test
-sudo passwd agent-admin            # SSH 접속에 쓸 비밀번호 (dev, test도 필요하면)
+# sudo passwd agent-admin          # (선택) agent-admin으로 직접 SSH 접속할 때만. 이 과제는 sudo -iu로 바꿔 쓰므로 필요 없음
 
 # 그룹 2개
 sudo groupadd agent-common
