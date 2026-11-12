@@ -134,4 +134,6 @@ ssh -p 20022 arang@192.168.64.2
 # [VM] 비밀 폴더(api_keys): 주인 agent-admin, 그룹 agent-core
 sudo chown agent-admin:agent-core /home/agent-admin/agent-app/api_keys
 sudo ls -ld /home/agent-admin/agent-app/api_keys
+sudo chmod 2770 /home/agent-admin/agent-app/api_keys
+sudo ls -ld /home/agent-admin/agent-app/api_keys
 ```
