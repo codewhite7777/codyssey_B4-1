@@ -108,4 +108,8 @@ id agent-test
 # [VM] 폴더 만들기 → 확인 (처음에는 주인이 root)
 sudo mkdir -p /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /home/agent-admin/agent-app/bin /var/log/agent-app
 sudo ls -l /home/agent-admin/agent-app
+
+# [VM] 홈 폴더에 agent-common "통과(x)"만 허용 (ACL) → 확인
+sudo setfacl -m g:agent-common:x /home/agent-admin
+getfacl /home/agent-admin
 ```
