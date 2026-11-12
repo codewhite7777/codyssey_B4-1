@@ -207,4 +207,7 @@ sudo ls -l /home/agent-admin/agent-app
 # [VM: arang] agent-admin으로 바꾸고 AGENT_HOME으로 이동
 sudo -iu agent-admin
 cd $AGENT_HOME
+
+# [VM: agent-admin] 📸 6 앱 실행 → Boot 5단계 [OK], Agent READY (이 창은 켜 둠, 종료는 Ctrl+C)
+./agent-app-linux-x86
 ```

@@ -592,6 +592,10 @@ Agent READY
 ...
 ```
 
+**📸 내 VM 실제 화면 (증거 6)**: Boot 5단계 모두 `[OK]` → `Agent READY`, 그 뒤 부하 주기(메모리 25MB씩 → 275MB에서 `PEAK REACHED` → 감소)
+
+![증거 6: Boot 5단계 OK, Agent READY](docs/images/evidence/6_boot_ready.png)
+
 **Agent READY 다음에 계속 나오는 줄은 정상입니다.** 이 앱은 일부러 **CPU와 메모리를 조금씩 더 쓰는 앱**입니다. 메모리를 0 → 256MB, CPU 사용 단계를 1 → 10까지 올렸다가 다시 0으로 내리기를 반복합니다.
 그래서 7단계의 monitor.sh에서 **CPU 경고가 실제로 뜹니다.** 같은 내용이 `/var/log/agent-app/agent_app.log`에도 쌓입니다.
 
@@ -865,7 +869,7 @@ $ cat /var/log/agent-app/monitor.log
 | 2 | UFW 활성화, 20022/tcp · 15034/tcp만 허용 | `sudo ufw status verbose` | [2단계](#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) | ✅ [2](docs/images/evidence/2_ufw_status.png) |
 | 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) | ✅ [3](docs/images/evidence/3_id_groups.png) |
 | 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | ✅ [4-1](docs/images/evidence/4-1_dirs.png) · [4-2](docs/images/evidence/4-2_test_denied.png) · [4-3](docs/images/evidence/4-3_dev_allowed.png) |
-| 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) | ⬜ |
+| 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) | 🔶 [6](docs/images/evidence/6_boot_ready.png) (15034 LISTEN 남음) |
 | 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) | ⬜ |
 | 7 | monitor.log 누적 (최근 라인) | `tail -5 /var/log/agent-app/monitor.log` | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |
 | 8 | crontab 매분 등록 + 1분 후 증가 | `crontab -l`, `wc -l` 전후 비교 | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |
