@@ -442,6 +442,18 @@ default:mask::rwx
 default:other::---
 ```
 
+**📸 내 VM 실제 화면 (증거 4-1)**: 폴더 5개의 주인 · 그룹 · 권한. `+`는 기본 ACL이 걸린 폴더(upload_files, 로그 폴더)
+
+![증거 4-1: 폴더 주인 · 그룹 · 권한](docs/images/evidence/4-1_dirs.png)
+
+| 폴더 | 권한 | 주인 | 그룹 | 의미 |
+|---|---|---|---|---|
+| agent-app | `750` | agent-admin | agent-common | 3명 모두 들어올 수 있음, 바깥은 막힘 |
+| upload_files | `2770` + 기본 ACL | agent-admin | agent-common | 3명 모두 읽기 · 쓰기 (공용) |
+| api_keys | `2770` | agent-admin | agent-core | admin · dev만 (비밀) |
+| bin | `750` | agent-dev | agent-core | dev가 만들고, admin은 실행만 |
+| /var/log/agent-app | `2770` + 기본 ACL | agent-admin | agent-core | admin · dev만 (로그) |
+
 **계정별로 직접 들어가 보기** (정책이 실제로 지켜지는지)
 
 ```console
@@ -838,7 +850,7 @@ $ cat /var/log/agent-app/monitor.log
 | 1 | SSH 포트 20022, root 원격 접속 차단 | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "`, `sudo ss -tulnp \| grep sshd`, `ssh -p 20022 root@localhost` | [1단계](#1단계-ssh-잠그기-포트-20022-root-원격-접속-차단) | ✅ [1-1](docs/images/evidence/1-1_sshd_rules.png) · [1-2](docs/images/evidence/1-2_sshd_listen.png) · [1-3](docs/images/evidence/1-3_root_denied.png) |
 | 2 | UFW 활성화, 20022/tcp · 15034/tcp만 허용 | `sudo ufw status verbose` | [2단계](#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) | ✅ [2](docs/images/evidence/2_ufw_status.png) |
 | 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) | ✅ [3](docs/images/evidence/3_id_groups.png) |
-| 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | ⬜ |
+| 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | 🔶 [4-1](docs/images/evidence/4-1_dirs.png) (4-2 접근 테스트 남음) |
 | 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) | ⬜ |
 | 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) | ⬜ |
 | 7 | monitor.log 누적 (최근 라인) | `tail -5 /var/log/agent-app/monitor.log` | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |

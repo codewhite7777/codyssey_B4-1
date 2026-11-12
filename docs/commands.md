@@ -150,4 +150,7 @@ sudo ls -ld /var/log/agent-app
 # [VM] 로그 폴더 기본 ACL: 앞으로 생길 로그 파일도 agent-core가 읽기·쓰기
 sudo setfacl -d -m g:agent-core:rw /var/log/agent-app
 sudo getfacl /var/log/agent-app
+
+# [VM] 📸 4-1 폴더 5개 한눈에
+sudo ls -ld /home/agent-admin/agent-app /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /home/agent-admin/agent-app/bin /var/log/agent-app
 ```
