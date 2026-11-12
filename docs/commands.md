@@ -160,3 +160,21 @@ sudo -u agent-test ls /home/agent-admin/agent-app/api_keys                      
 sudo -u agent-test ls /var/log/agent-app                                           # 로그 폴더: Permission denied
 sudo -u agent-dev ls -la /home/agent-admin/agent-app/api_keys                      # dev는 비밀 폴더 통과 (📸 4-2 test 거절, 4-3 dev 통과)
 ```
+
+## 5단계. 환경변수 + 키 파일 (진행 중)
+
+```bash
+# [VM] agent-admin으로 바꾸기 (프롬프트가 agent-admin@b4-1로 바뀜, 이후 sudo 없음)
+sudo -iu agent-admin
+
+# [VM: agent-admin] 환경변수 5개를 ~/.bashrc 끝에 추가
+cat >> ~/.bashrc <<'EOF'
+
+# ---- agent-app 실행 환경 ----
+export AGENT_HOME=/home/agent-admin/agent-app
+export AGENT_PORT=15034
+export AGENT_UPLOAD_DIR=$AGENT_HOME/upload_files
+export AGENT_KEY_PATH=$AGENT_HOME/api_keys
+export AGENT_LOG_DIR=/var/log/agent-app
+EOF
+```
