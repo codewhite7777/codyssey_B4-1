@@ -85,4 +85,5 @@ sudo ufw status verbose
 # [VM] 계정 만들기
 sudo useradd -m -s /bin/bash agent-admin
 sudo useradd -m -s /bin/bash agent-dev
+sudo useradd -m -s /bin/bash agent-test
 ```
