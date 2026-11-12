@@ -157,4 +157,5 @@ sudo ls -ld /home/agent-admin/agent-app /home/agent-admin/agent-app/upload_files
 # [VM] 계정별 접근 시험 (sudo -u 계정 = 그 계정 권한으로 실행)
 sudo -u agent-test touch /home/agent-admin/agent-app/upload_files/from-test.txt    # 공용 폴더 쓰기: 성공
 sudo -u agent-test ls /home/agent-admin/agent-app/api_keys                         # 비밀 폴더: Permission denied
+sudo -u agent-test ls /var/log/agent-app                                           # 로그 폴더: Permission denied
 ```
