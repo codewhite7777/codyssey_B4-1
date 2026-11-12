@@ -112,4 +112,7 @@ sudo ls -l /home/agent-admin/agent-app
 # [VM] 홈 폴더에 agent-common "통과(x)"만 허용 (ACL) → 확인
 sudo setfacl -m g:agent-common:x /home/agent-admin
 getfacl /home/agent-admin
+
+# [VM] 앱 폴더(AGENT_HOME): 주인 agent-admin, 그룹 agent-common
+sudo chown agent-admin:agent-common /home/agent-admin/agent-app
 ```
