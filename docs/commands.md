@@ -144,4 +144,6 @@ sudo ls -ld /home/agent-admin/agent-app/bin
 
 # [VM] 로그 폴더: 주인 agent-admin, 그룹 agent-core
 sudo chown agent-admin:agent-core /var/log/agent-app
+sudo chmod 2770 /var/log/agent-app
+sudo ls -ld /var/log/agent-app
 ```
