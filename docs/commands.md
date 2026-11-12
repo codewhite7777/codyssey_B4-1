@@ -181,4 +181,8 @@ EOF
 # [VM: agent-admin] 지금 창에 적용 → 📸 5-1 확인
 source ~/.bashrc
 env | grep ^AGENT_ | sort
+
+# [VM: agent-admin] 키 파일 (앱이 읽는 이름: secret.key) → 내용 확인
+echo "agent_api_key_test" > $AGENT_KEY_PATH/secret.key
+cat $AGENT_KEY_PATH/secret.key
 ```
