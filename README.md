@@ -664,6 +664,10 @@ sudo: a password is required
 > 설정 파일 `/etc/ufw/ufw.conf`의 `ENABLED=yes`를 읽으면 sudo 없이도 되지만, 이건 "켜기로 **설정**됨"일 뿐입니다.
 > 테스트 환경에서 재부팅 뒤 방화벽 규칙이 올라오지 않았을 때 `ENABLED=yes`인데도 `ufw status`는 `inactive`였습니다. 그대로 두면 방화벽이 꺼졌는데 `[OK]`가 나옵니다. 그래서 실제 상태를 보는 방법을 썼습니다.
 
+**📸 내 VM 실제 화면 (증거 7-1)**: monitor.sh 주인 `agent-dev`, 그룹 `agent-core`, 권한 `750`
+
+![증거 7-1: monitor.sh 권한](docs/images/evidence/7-1_monitor_perm.png)
+
 | 누가 | 권한 칸 | 할 수 있는 것 |
 |---|---|---|
 | agent-dev (소유자) | `rwx` | 읽기, **수정**, 실행 |

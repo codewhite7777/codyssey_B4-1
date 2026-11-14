@@ -235,4 +235,8 @@ sudo ss -ltnp | grep 15034
 # [VM: arang] 저장소 폴더로 이동, 설치할 파일 확인
 cd ~/codyssey_B4-1
 ls bin config
+
+# [VM: arang] monitor.sh 설치 (복사 + 주인 agent-dev + 그룹 agent-core + 권한 750) → 📸 7-1 확인
+sudo install -o agent-dev -g agent-core -m 750 bin/monitor.sh /home/agent-admin/agent-app/bin/monitor.sh
+sudo ls -l /home/agent-admin/agent-app/bin
 ```
