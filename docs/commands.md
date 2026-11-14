@@ -247,4 +247,7 @@ sudo visudo -cf /etc/sudoers.d/agent-monitor
 # [VM: arang] 규칙 시험: 허용한 명령은 됨, 단어 하나만 달라도 거절
 sudo -u agent-admin sudo -n /usr/sbin/ufw status              # Status: active
 sudo -u agent-admin sudo -n /usr/sbin/ufw status verbose      # sudo: a password is required
+
+# [VM: arang] 📸 7-2 monitor.sh를 agent-admin으로 실행 (정상: [OK] 3개, MEM 경고, exit=0)
+sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh; echo "exit=$?"
 ```
