@@ -213,4 +213,14 @@ cd $AGENT_HOME
 
 # [Mac] 새 탭에서 다시 접속 (탭 1 = 앱 실행 중, 탭 2 = 작업용)
 ssh -p 20022 arang@192.168.64.2
+
+# (이틀 뒤 SSH가 끊기며 앱도 종료됨 → 다시 실행)
+# [Mac] 탭 1 접속 → [VM] 앱이 살아 있는지 확인 (아무것도 안 나오면 꺼진 것)
+ssh -p 20022 arang@192.168.64.2
+pgrep -a -f "^[^ ]*agent-app-linux"
+
+# [VM] 탭 1에서 앱 다시 실행 → Boot 5단계 [OK], Agent READY
+sudo -iu agent-admin
+cd $AGENT_HOME
+./agent-app-linux-x86
 ```
