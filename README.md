@@ -752,6 +752,16 @@ Checking process 'agent-app-linux'... [FAIL] not running
 exit=1
 ```
 
+**📸 내 VM 실제 화면 (증거 7-4)**: 앱을 Ctrl+C로 끈 뒤 실행 → `[FAIL] not running`, 바로 멈추고 `exit=1`
+
+![증거 7-4: 앱 종료 → exit 1](docs/images/evidence/7-4_monitor_fail.png)
+
+| 상황 | monitor.sh 반응 | 종료 코드 | 증거 |
+|---|---|---|---|
+| 정상 (MEM 기준 초과) | 경고만, 기록함 | `exit=0` | 7-2 |
+| 방화벽 꺼짐 | 경고만, 기록함 | `exit=0` | 7-3 |
+| 앱 죽음 | `[FAIL]`, 바로 멈춤 | `exit=1` | 7-4 |
+
 앱 이름이 명령줄 **중간에만** 들어간 다른 프로세스가 있어도 앱으로 착각하지 않는지 확인한 결과입니다.
 
 ```console
@@ -886,7 +896,7 @@ $ cat /var/log/agent-app/monitor.log
 | 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) | ✅ [3](docs/images/evidence/3_id_groups.png) |
 | 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | ✅ [4-1](docs/images/evidence/4-1_dirs.png) · [4-2](docs/images/evidence/4-2_test_denied.png) · [4-3](docs/images/evidence/4-3_dev_allowed.png) |
 | 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) | ✅ [6](docs/images/evidence/6_boot_ready.png) · [6-2](docs/images/evidence/6-2_app_listen.png) |
-| 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) | 🔶 [7-1](docs/images/evidence/7-1_monitor_perm.png) · [7-2](docs/images/evidence/7-2_monitor_ok.png) · [7-3](docs/images/evidence/7-3_monitor_fw_warn.png) (exit 1 남음) |
+| 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) | ✅ [7-1](docs/images/evidence/7-1_monitor_perm.png) · [7-2](docs/images/evidence/7-2_monitor_ok.png) · [7-3](docs/images/evidence/7-3_monitor_fw_warn.png) · [7-4](docs/images/evidence/7-4_monitor_fail.png) |
 | 7 | monitor.log 누적 (최근 라인) | `tail -5 /var/log/agent-app/monitor.log` | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |
 | 8 | crontab 매분 등록 + 1분 후 증가 | `crontab -l`, `wc -l` 전후 비교 | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |
 

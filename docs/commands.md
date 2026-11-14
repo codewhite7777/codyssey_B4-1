@@ -258,4 +258,10 @@ sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh; echo "exit=$?"
 # [VM: arang] 방화벽 다시 켜기 (y) → 규칙 그대로인지 확인
 sudo ufw enable
 sudo ufw status
+
+# [VM: 탭 1] 앱 끄기: Ctrl + C (장애 상황 흉내)
+
+# [VM: agent-admin] 📸 7-4 앱이 없을 때 → [FAIL] not running, exit=1
+#   (agent-admin 창에서는 sudo 없이 실행. sudo -u를 붙이면 sudo 거절로 exit=1이 나와 증거가 아님)
+/home/agent-admin/agent-app/bin/monitor.sh; echo "exit=$?"
 ```
