@@ -194,7 +194,7 @@ chmod 660 $AGENT_KEY_PATH/*.key
 ls -l $AGENT_KEY_PATH
 ```
 
-## 6단계. 앱 실행 (진행 중)
+## 6단계. 앱 실행
 
 ```bash
 # [VM: agent-admin] arang으로 돌아가기
@@ -223,4 +223,8 @@ pgrep -a -f "^[^ ]*agent-app-linux"
 sudo -iu agent-admin
 cd $AGENT_HOME
 ./agent-app-linux-x86
+
+# [Mac] 새 탭(탭 2)에서 접속 → [VM] 📸 6-2 앱이 15034에서 LISTEN
+ssh -p 20022 arang@192.168.64.2
+sudo ss -ltnp | grep 15034
 ```
