@@ -229,7 +229,7 @@ ssh -p 20022 arang@192.168.64.2
 sudo ss -ltnp | grep 15034
 ```
 
-## 7단계. monitor.sh (진행 중)
+## 7단계. monitor.sh
 
 ```bash
 # [VM: arang] 저장소 폴더로 이동, 설치할 파일 확인
@@ -264,4 +264,7 @@ sudo ufw status
 # [VM: agent-admin] 📸 7-4 앱이 없을 때 → [FAIL] not running, exit=1
 #   (agent-admin 창에서는 sudo 없이 실행. sudo -u를 붙이면 sudo 거절로 exit=1이 나와 증거가 아님)
 /home/agent-admin/agent-app/bin/monitor.sh; echo "exit=$?"
+
+# [VM: 탭 1, agent-admin] 앱 다시 켜기 (8단계 cron이 정상 기록을 쌓도록)
+./agent-app-linux-x86
 ```
