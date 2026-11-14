@@ -836,6 +836,10 @@ $ tail -2 /var/log/agent-app/monitor.log
 [2026-10-26 23:05:03] PID:1070 CPU:15.6% MEM:7.5% DISK_USED:32%
 ```
 
+**📸 내 VM 실제 화면 (증거 7, 8-2)**: 16:48 ~ 16:57 매분 `:02`초에 한 줄씩 자동으로 쌓임 (cron 자동 실행 + `>>` 누적 + 지정 포맷)
+
+![증거 7, 8-2: monitor.log 1분마다 누적](docs/images/evidence/8-2_monitor_log.png)
+
 시각이 매분 `:02`초 근처로 찍히는 것이 cron이 실행했다는 표시입니다. (cron이 매분 0초에 깨우고, CPU 측정에 1초 쉬기 때문)
 안 늘어나면 `systemctl status cron` 으로 cron이 켜져 있는지 봅니다.
 
@@ -897,8 +901,8 @@ $ cat /var/log/agent-app/monitor.log
 | 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | ✅ [4-1](docs/images/evidence/4-1_dirs.png) · [4-2](docs/images/evidence/4-2_test_denied.png) · [4-3](docs/images/evidence/4-3_dev_allowed.png) |
 | 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) | ✅ [6](docs/images/evidence/6_boot_ready.png) · [6-2](docs/images/evidence/6-2_app_listen.png) |
 | 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) | ✅ [7-1](docs/images/evidence/7-1_monitor_perm.png) · [7-2](docs/images/evidence/7-2_monitor_ok.png) · [7-3](docs/images/evidence/7-3_monitor_fw_warn.png) · [7-4](docs/images/evidence/7-4_monitor_fail.png) |
-| 7 | monitor.log 누적 (최근 라인) | `tail -5 /var/log/agent-app/monitor.log` | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |
-| 8 | crontab 매분 등록 + 1분 후 증가 | `crontab -l`, `wc -l` 전후 비교 | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |
+| 7 | monitor.log 누적 (최근 라인) | `tail -5 /var/log/agent-app/monitor.log` | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ✅ [8-2](docs/images/evidence/8-2_monitor_log.png) |
+| 8 | crontab 매분 등록 + 1분 후 증가 | `crontab -l`, `wc -l` 전후 비교 | [8-1](#8-1-cron-등록-agent-admin의-crontab) | 🔶 [8-2](docs/images/evidence/8-2_monitor_log.png) 1분마다 증가 (crontab -l 남음) |
 
 ---
 

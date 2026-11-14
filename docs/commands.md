@@ -279,4 +279,13 @@ crontab -l
 
 # [VM: agent-admin] 앱이 켜져 있는지 확인 → 아무것도 안 나옴 (앱이 꺼져 있었음)
 pgrep -a -f "^[^ ]*agent-app-linux"
+
+# [VM: 탭 1, agent-admin] 앱 다시 켜기
+./agent-app-linux-x86
+
+# [Mac] 탭 2에서 VM 접속 (Mac에서 sudo를 치면 Mac 관리자 비밀번호를 물으니 주의)
+ssh -p 20022 arang@192.168.64.2
+
+# [VM: arang] 📸 7, 8-2 monitor.log가 매분 자동으로 쌓이는지 (로그 폴더는 core 전용이라 sudo)
+sudo tail /var/log/agent-app/monitor.log
 ```
