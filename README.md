@@ -738,6 +738,10 @@ DISK Used : 32%
 exit=0
 ```
 
+**📸 내 VM 실제 화면 (증거 7-3)**: `sudo ufw disable` 후 실행 → `[WARNING] Firewall (ufw) is not active`, 그래도 측정 · 기록 후 `exit=0`
+
+![증거 7-3: 방화벽 꺼짐 경고](docs/images/evidence/7-3_monitor_fw_warn.png)
+
 **실행 확인 3: 앱 종료(Ctrl+C) → exit 1**
 
 ```console
@@ -882,7 +886,7 @@ $ cat /var/log/agent-app/monitor.log
 | 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) | ✅ [3](docs/images/evidence/3_id_groups.png) |
 | 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | ✅ [4-1](docs/images/evidence/4-1_dirs.png) · [4-2](docs/images/evidence/4-2_test_denied.png) · [4-3](docs/images/evidence/4-3_dev_allowed.png) |
 | 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) | ✅ [6](docs/images/evidence/6_boot_ready.png) · [6-2](docs/images/evidence/6-2_app_listen.png) |
-| 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) | 🔶 [7-1](docs/images/evidence/7-1_monitor_perm.png) · [7-2](docs/images/evidence/7-2_monitor_ok.png) (방화벽 경고, exit 1 남음) |
+| 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) | 🔶 [7-1](docs/images/evidence/7-1_monitor_perm.png) · [7-2](docs/images/evidence/7-2_monitor_ok.png) · [7-3](docs/images/evidence/7-3_monitor_fw_warn.png) (exit 1 남음) |
 | 7 | monitor.log 누적 (최근 라인) | `tail -5 /var/log/agent-app/monitor.log` | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |
 | 8 | crontab 매분 등록 + 1분 후 증가 | `crontab -l`, `wc -l` 전후 비교 | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ⬜ |
 

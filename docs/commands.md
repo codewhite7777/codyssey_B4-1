@@ -250,4 +250,8 @@ sudo -u agent-admin sudo -n /usr/sbin/ufw status verbose      # sudo: a password
 
 # [VM: arang] 📸 7-2 monitor.sh를 agent-admin으로 실행 (정상: [OK] 3개, MEM 경고, exit=0)
 sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh; echo "exit=$?"
+
+# [VM: arang] 방화벽 잠깐 끄기 → 📸 7-3 monitor.sh (방화벽 경고, exit=0)
+sudo ufw disable
+sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh; echo "exit=$?"
 ```
