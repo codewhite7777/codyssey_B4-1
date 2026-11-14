@@ -254,4 +254,8 @@ sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh; echo "exit=$?"
 # [VM: arang] 방화벽 잠깐 끄기 → 📸 7-3 monitor.sh (방화벽 경고, exit=0)
 sudo ufw disable
 sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh; echo "exit=$?"
+
+# [VM: arang] 방화벽 다시 켜기 (y) → 규칙 그대로인지 확인
+sudo ufw enable
+sudo ufw status
 ```
