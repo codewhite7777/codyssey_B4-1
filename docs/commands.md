@@ -239,4 +239,8 @@ ls bin config
 # [VM: arang] monitor.sh 설치 (복사 + 주인 agent-dev + 그룹 agent-core + 권한 750) → 📸 7-1 확인
 sudo install -o agent-dev -g agent-core -m 750 bin/monitor.sh /home/agent-admin/agent-app/bin/monitor.sh
 sudo ls -l /home/agent-admin/agent-app/bin
+
+# [VM: arang] agent-core에게 "ufw status" 한 명령만 sudo 허용 → 문법 검사 (parsed OK)
+sudo install -o root -g root -m 0440 config/sudoers-agent-monitor /etc/sudoers.d/agent-monitor
+sudo visudo -cf /etc/sudoers.d/agent-monitor
 ```
