@@ -243,4 +243,8 @@ sudo ls -l /home/agent-admin/agent-app/bin
 # [VM: arang] agent-core에게 "ufw status" 한 명령만 sudo 허용 → 문법 검사 (parsed OK)
 sudo install -o root -g root -m 0440 config/sudoers-agent-monitor /etc/sudoers.d/agent-monitor
 sudo visudo -cf /etc/sudoers.d/agent-monitor
+
+# [VM: arang] 규칙 시험: 허용한 명령은 됨, 단어 하나만 달라도 거절
+sudo -u agent-admin sudo -n /usr/sbin/ufw status              # Status: active
+sudo -u agent-admin sudo -n /usr/sbin/ufw status verbose      # sudo: a password is required
 ```
