@@ -228,3 +228,11 @@ cd $AGENT_HOME
 ssh -p 20022 arang@192.168.64.2
 sudo ss -ltnp | grep 15034
 ```
+
+## 7단계. monitor.sh (진행 중)
+
+```bash
+# [VM: arang] 저장소 폴더로 이동, 설치할 파일 확인
+cd ~/codyssey_B4-1
+ls bin config
+```
