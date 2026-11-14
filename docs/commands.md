@@ -268,3 +268,15 @@ sudo ufw status
 # [VM: 탭 1, agent-admin] 앱 다시 켜기 (8단계 cron이 정상 기록을 쌓도록)
 ./agent-app-linux-x86
 ```
+
+## 8단계. cron + logrotate (진행 중)
+
+```bash
+# [VM: agent-admin] agent-admin 본인의 crontab에 1분마다 실행 등록 (sudo 없이) → 확인
+#   (처음에 agent-admin 창에서 sudo crontab -u ... 를 시도 → agent-admin은 비밀번호가 없어 거절됨)
+echo "* * * * * /home/agent-admin/agent-app/bin/monitor.sh > /dev/null 2>&1" | crontab -
+crontab -l
+
+# [VM: agent-admin] 앱이 켜져 있는지 확인 → 아무것도 안 나옴 (앱이 꺼져 있었음)
+pgrep -a -f "^[^ ]*agent-app-linux"
+```
