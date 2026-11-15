@@ -2,7 +2,7 @@
 
 평가 질문마다 **보여줄 곳**과 **말하기 예시**를 정리했습니다. 말하기는 외우지 말고 흐름만 잡아 본인 말로 합니다.
 
-[← README](../README.md) · [monitor.sh](../bin/monitor.sh) · [logrotate 설정](../config/logrotate-agent-app)
+[← README](../README.md) · [개념과 배경](concepts.md) · [monitor.sh](../bin/monitor.sh) · [logrotate 설정](../config/logrotate-agent-app)
 
 ---
 
@@ -28,14 +28,14 @@
 
 | # | 평가 질문 | 상태 | 확인 명령 | 보여줄 곳 |
 |---|---|---|---|---|
-| 1-1 | SSH 포트 20022, Root 원격 접속 차단 | ✅ | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "` → `port 20022`, `permitrootlogin no` | [README 1단계](../README.md#1단계-ssh-잠그기-포트-20022-root-원격-접속-차단) |
-| 1-2 | 방화벽(UFW) 활성, 20022/tcp · 15034/tcp만 허용 | ✅ | `sudo ufw status verbose` → `Status: active`, 허용 2줄 | [README 2단계](../README.md#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) |
-| 1-3 | 계정 3개, 그룹 agent-common/core 구성 | ✅ | `id agent-test` → agent-common만 | [README 3단계](../README.md#3단계-계정--그룹-만들기), [4단계](../README.md#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) |
-| 1-4 | Boot Sequence 5단계 [OK], Agent READY | ✅ | 앱 실행 화면 + `ss -ltn \| grep 15034` | [README 6단계](../README.md#6단계-앱-실행-boot-sequence-5단계-ok) |
-| 1-5 | monitor.sh가 프로세스/포트 점검, 비정상 시 exit 1 | ✅ | 앱을 끄고 `monitor.sh; echo "exit=$?"` → `exit=1` | [README 7단계 실행 확인 3, 4](../README.md#7단계-monitorsh-만들기) |
-| 1-6 | monitor.log가 지정 포맷으로 누적 | ✅ | `tail -5 /var/log/agent-app/monitor.log` | [README 8-1](../README.md#8-1-cron-등록-agent-admin의-crontab) |
-| 1-7 | cron 매분 실행으로 자동 증가 | ✅ | `crontab -l`, `wc -l` 1분 간격 비교 | [README 8-1](../README.md#8-1-cron-등록-agent-admin의-crontab) |
-| 1-8 | 용량관리(10MB/10개) 설정 + 동작 설명 | ✅ logrotate | `cat /etc/logrotate.d/agent-app` | [README 8-2](../README.md#8-2-logrotate로-10mb--10개-관리), 아래 그림 |
+| 1-1 | SSH 포트 20022, Root 원격 접속 차단 | ✅ | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "` → `port 20022`, `permitrootlogin no` | [README 1단계](../README.md#1단계-ssh-잠그기) |
+| 1-2 | 방화벽(UFW) 활성, 20022/tcp · 15034/tcp만 허용 | ✅ | `sudo ufw status verbose` → `Status: active`, 허용 2줄 | [README 2단계](../README.md#2단계-방화벽-켜기) |
+| 1-3 | 계정 3개, 그룹 agent-common/core 구성 | ✅ | `id agent-test` → agent-common만 | [README 3단계](../README.md#3단계-계정--그룹), [4단계](../README.md#4단계-폴더--권한) |
+| 1-4 | Boot Sequence 5단계 [OK], Agent READY | ✅ | 앱 실행 화면 + `ss -ltn \| grep 15034` | [README 6단계](../README.md#6단계-앱-실행) |
+| 1-5 | monitor.sh가 프로세스/포트 점검, 비정상 시 exit 1 | ✅ | 앱을 끄고 `monitor.sh; echo "exit=$?"` → `exit=1` | [README 7단계 (7-4)](../README.md#7단계-monitorsh) |
+| 1-6 | monitor.log가 지정 포맷으로 누적 | ✅ | `tail -5 /var/log/agent-app/monitor.log` | [README 8단계](../README.md#8단계-cron--logrotate) |
+| 1-7 | cron 매분 실행으로 자동 증가 | ✅ | `crontab -l`, `wc -l` 1분 간격 비교 | [README 8단계](../README.md#8단계-cron--logrotate) |
+| 1-8 | 용량관리(10MB/10개) 설정 + 동작 설명 | ✅ logrotate | `cat /etc/logrotate.d/agent-app` | [README 8단계](../README.md#8단계-cron--logrotate), 아래 그림 |
 
 **1-8 동작 설명**
 
@@ -49,7 +49,7 @@
 
 ### 2-1. 프로세스 식별 · 포트 확인에 쓴 명령과 선택 이유
 
-**보여줄 곳**: [monitor.sh](../bin/monitor.sh) ①②, [README 7단계 표](../README.md#7단계-monitorsh-만들기)
+**보여줄 곳**: [monitor.sh](../bin/monitor.sh) ①②, [concepts.md 7. monitor.sh](concepts.md#7-monitorsh)
 
 ![monitor.sh 순서도](images/monitor_flow.svg)
 
@@ -62,7 +62,7 @@
 
 > **실제로 겪은 문제와 고친 점**
 > - 처음에는 `pgrep -f agent-app-linux`(명령줄 어디든 이름이 있으면 찾기)를 썼습니다. 그런데 앱을 띄운 셸 `bash -c "... ./agent-app-linux-x86 ..."`의 명령줄에도 같은 글자가 있어서, **앱이 아닌 셸의 PID**가 로그에 찍혔습니다. `vim agent-app-linux-x86`처럼 파일을 열어 둔 것도 앱으로 착각할 수 있습니다.
-> - 그래서 `^[^ ]*agent-app-linux`로 바꿔 **명령줄의 첫 단어가 앱인 것만** 찾게 했습니다. 고친 뒤 앱을 끄고 미끼 프로세스를 띄워 두어도 `[FAIL] exit=1`이 나오는 것을 확인했습니다. ([README 실행 확인 3](../README.md#7단계-monitorsh-만들기))
+> - 그래서 `^[^ ]*agent-app-linux`로 바꿔 **명령줄의 첫 단어가 앱인 것만** 찾게 했습니다. 고친 뒤 앱을 끄고 미끼 프로세스를 띄워 두어도 `[FAIL] exit=1`이 나오는 것을 확인했습니다. ([concepts.md 7. monitor.sh](concepts.md#7-monitorsh))
 > - `agent-app`처럼 더 짧은 이름은 monitor.sh의 경로(`/home/agent-admin/agent-app/bin/...`)에도 들어 있어서 피했습니다.
 >
 > **프로세스가 2개 보이는 이유**: 제공 앱은 PyInstaller 실행 파일이라 **부모가 압축을 풀고 자식이 실제로 일합니다.** `-o`(가장 먼저 뜬 것)로 부모 PID를 기록합니다. 자식이 죽으면 부모도 함께 끝나서, 부모만 봐도 앱이 살아 있는지 알 수 있습니다.
@@ -86,7 +86,7 @@
 
 ### 2-3. 소유자(agent-dev)와 실행자(agent-admin, cron) 권한 정책
 
-**보여줄 곳**: `ls -l /home/agent-admin/agent-app/bin/monitor.sh`, [README 7단계 표](../README.md#7단계-monitorsh-만들기)
+**보여줄 곳**: `ls -l /home/agent-admin/agent-app/bin/monitor.sh`, [concepts.md 7. monitor.sh](concepts.md#7-monitorsh)
 
 ```console
 -rwxr-x--- 1 agent-dev agent-core 5108 Oct 26 23:02 monitor.sh
@@ -186,7 +186,7 @@ sudo: a password is required
 | 다른 프로그램이 15034를 차지 (포트 충돌) | `ss -ltnp \| grep 15034` → PID가 앱과 다름 |
 | 앱이 멈춤 (정지 · 무한 대기) | `ps -o pid,stat,etime -p <PID>` → stat이 T 등 |
 
-> **말하기**: "빠르고 흔한 원인부터 지웁니다. 먼저 앱이 남긴 출력을 보고, 다음은 포트 번호가 맞는지, 그다음 다른 프로그램이 그 포트를 쓰고 있는지, 마지막으로 앱이 멈춰 있는지 봅니다. 실제로 monitor.sh 테스트에서 프로세스는 있는데 포트를 안 연 경우 `[FAIL] not listening`과 exit 1이 나오는 것을 확인했습니다. ([README 실행 확인 4](../README.md#7단계-monitorsh-만들기))"
+> **말하기**: "빠르고 흔한 원인부터 지웁니다. 먼저 앱이 남긴 출력을 보고, 다음은 포트 번호가 맞는지, 그다음 다른 프로그램이 그 포트를 쓰고 있는지, 마지막으로 앱이 멈춰 있는지 봅니다. 실제로 monitor.sh 테스트에서 프로세스는 있는데 포트를 안 연 경우 `[FAIL] not listening`과 exit 1이 나오는 것을 확인했습니다. ([concepts.md 7. monitor.sh](concepts.md#7-monitorsh))"
 
 ### 4-3. 로그가 급증해 디스크가 가득 찰 위험: 단기 / 중기 대응
 

@@ -4,42 +4,18 @@
 |---|---|---|---|
 | AI/SW 기초 | Linux와 OS | 40시간 | 필수 |
 
-**환경: Ubuntu Server 22.04 LTS (Mac M칩 + UTM VM, arm64) / 방화벽: UFW / 범위: 필수 요구사항만 (보너스 제외)**
+**환경:** 교육장 iMac(Intel) + UTM, Ubuntu Server 22.04.5 LTS (x86_64) · **방화벽:** UFW · **범위:** 필수 요구사항만 (보너스 제외)
 
-이 README가 **요구사항 수행 내역서**입니다. 다섯 부분으로 되어 있습니다.
+이 README가 **요구사항 수행 내역서**입니다. 📸 사진은 모두 **내 VM에서 직접 찍은 화면**입니다.
 
-| 순서 | 섹션 | 내용 |
-|---|---|---|
-| 1 | [한눈에 보기](#한눈에-보기) | 전체 흐름 그림 한 장 + 용어 사전 |
-| 2 | [제공 앱은 무엇인가](#제공-앱은-무엇인가) | 과제가 준 실행 파일이 무엇을 하는지 (직접 실행해서 확인) |
-| 3 | [실습 환경: 왜 UTM VM인가](#실습-환경-왜-utm-vm인가) | 다른 방식과 비교한 기준과 근거 |
-| 4 | [실행 흐름 0~8단계](#실행-흐름) | 단계마다 **개념(그림) → 명령 → 확인 → 실제 출력** |
-| 5 | [증거 자료 체크리스트](#증거-자료-체크리스트) | 과제가 요구한 증거 8개가 어디 있는지 |
-
-> **평가하시는 분은 [한눈에 보기](#한눈에-보기)와 [제공 앱은 무엇인가](#제공-앱은-무엇인가)로 전체를 먼저 보고, [실행 흐름](#실행-흐름)을 1단계부터 따라 가면 됩니다.**
-
-| 함께 보는 파일 | 내용 |
+| 문서 | 내용 |
 |---|---|
-| [docs/evaluation.md](docs/evaluation.md) | **평가표 항목 1~4 정리** (질문마다 보여줄 곳, 그림, 말하기 예시) |
-| [docs/commands.md](docs/commands.md) | **명령어 기록**: 내 VM에서 실제로 실행한 명령을 순서대로 |
-| [bin/monitor.sh](bin/monitor.sh) | 자동화 스크립트 소스코드 (Bash) |
-| [config/logrotate-agent-app](config/logrotate-agent-app) | 로그 용량 관리 설정 (10MB / 10개) |
-| [config/sudoers-agent-monitor](config/sudoers-agent-monitor) | monitor.sh가 방화벽 상태를 볼 수 있게 `ufw status`만 허용 |
-
-## 진행 상황
-
-| 단계 | 할 일 | 결과물 | 상태 |
-|---|---|---|---|
-| 1~2 | SSH 포트 20022, root 차단, UFW로 20022 · 15034만 허용 | `/etc/ssh/sshd_config`, `ufw status` | ✅ |
-| 3~4 | 계정 3개, 그룹 2개, 폴더 · 권한 · ACL | `id`, `ls -l`, `getfacl` | ✅ |
-| 5~6 | 환경변수, 키 파일, 앱 실행 (Boot 5단계 [OK]) | `~/.bashrc`, `secret.key` | ✅ |
-| 7 | monitor.sh (점검 → 수집 → 경고 → 기록) | [bin/monitor.sh](bin/monitor.sh), [config/sudoers-agent-monitor](config/sudoers-agent-monitor) | ✅ |
-| 8 | cron 1분마다 실행 + logrotate 10MB/10개 | `crontab -l`, [config/logrotate-agent-app](config/logrotate-agent-app) | ✅ |
-| - | 보너스 (report.sh, 시간 기반 보존) | - | ⛔ 하지 않음 |
-
-> **출력 예시와 증거 사진에 대해**
-> - 단계별 `$` 명령 아래의 출력 예시는 테스트 환경에서 제공 앱을 실제로 실행하며 얻은 결과입니다. (UID, 시각, PID는 환경마다 다릅니다.)
-> - **📸 표시가 붙은 사진은 내 VM(교육장 iMac + UTM, Ubuntu Server 22.04 x86_64)에서 직접 찍은 화면**입니다. 모아 보기: [증거 자료 체크리스트](#증거-자료-체크리스트), 실행한 명령 순서: [docs/commands.md](docs/commands.md)
+| **README** (이 문서) | 결과 요약 + 단계별 수행 내역과 증거 사진 |
+| [docs/commands.md](docs/commands.md) | 설정 · 명령어 기록: 내 VM에서 실행한 명령을 순서 그대로 |
+| [docs/concepts.md](docs/concepts.md) | 개념과 배경: 제공 앱, UTM을 고른 이유, 권한 · cron 등 자세한 설명 |
+| [docs/evaluation.md](docs/evaluation.md) | 평가표 항목 1~4: 질문마다 보여줄 곳과 말하기 예시 |
+| [bin/monitor.sh](bin/monitor.sh) | 자동화 스크립트 (Bash) |
+| [config/](config/) | logrotate 설정 (10MB / 10개), sudoers 설정 (`ufw status`만 허용) |
 
 ---
 
@@ -47,909 +23,299 @@
 
 ![전체 흐름](docs/images/overview.svg)
 
-이 과제를 한 문장으로 줄이면 **"서버의 문을 잠그고, 사람마다 출입증을 나눠 주고, 가게(앱)를 연 다음, 경비원(monitor.sh)이 1분마다 순찰하며 일지(monitor.log)를 쓰게 만든다"** 입니다.
-
-### 용어 사전 (먼저 읽으면 편한 9개)
-
-| 용어 | 쉬운 말 | 이 과제에서 |
-|---|---|---|
-| SSH | 다른 컴퓨터에서 이 서버에 원격으로 들어오는 통로 | 22번 → **20022번** 문으로 옮기고, root는 못 들어오게 |
-| 포트 | 한 서버 안의 "문 번호". 프로그램마다 자기 문을 연다 | sshd = 20022, 앱 = **15034** |
-| 방화벽 (UFW) | 어떤 문으로 들어오는 요청을 통과시킬지 정하는 경비 | 20022, 15034만 통과 |
-| 계정 / 그룹 | 계정 = 사람 한 명, 그룹 = 같은 권한을 받는 사람들 묶음 | admin, dev, test / common, core |
-| 권한 (rwx) | 읽기 · 쓰기 · 실행(폴더는 들어가기)을 누구에게 줄지 | `750`, `2770`, `660` |
-| ACL | 기본 권한(소유자/그룹/나머지)으로 부족할 때 **사람이나 그룹을 더 지정**하는 추가 규칙 | 홈 폴더 통과, 새 파일도 그룹이 쓰기 가능 |
-| 환경변수 | 프로그램에 건네는 "설정 메모" (`이름=값`) | `AGENT_HOME`, `AGENT_PORT` … |
-| 프로세스 | 지금 실행 중인 프로그램 하나 (번호 = PID) | 앱이 살아 있나 = 프로세스가 있나 |
-| cron / logrotate | cron = 정해진 시간에 자동 실행, logrotate = 로그가 커지면 잘라서 보관 | 1분마다 monitor.sh, 10MB × 10개 |
+**"서버의 문을 잠그고(1~2), 사람마다 출입증을 나눠 주고(3~4), 가게(앱)를 연 다음(5~6), 경비원(monitor.sh)이 1분마다 순찰하며 일지(monitor.log)를 쓰게 만든다(7~8)."**
 
 ---
 
-## 제공 앱은 무엇인가
+## 결과 요약
 
-과제는 `agent-app-linux-x86`(Intel · AMD용)과 `agent-app-linux-arm64`(Mac M칩용) 실행 파일을 줍니다. 과제 문서에는 "실행 대상"이라고만 적혀 있어서, **직접 실행해 보고 화면 출력과 로그로 확인한 내용**을 정리했습니다. (x86 파일로 확인. arm64는 같은 앱의 ARM용 빌드)
-
-![제공 앱이 하는 일](docs/images/app_roles.svg)
-
-**한 줄 요약: 켤 때는 내 세팅을 채점하고, 켜진 뒤에는 monitor.sh가 잡아낼 거리를 일부러 만들어 주는 앱입니다.**
-
-### 역할 ① 채점기: 부팅할 때 5가지를 검사한다
-
-| 단계 | 검사하는 것 | 과제 단계 | 틀렸을 때 실제 출력 예 |
-|---|---|---|---|
-| [1/5] | root가 아닌 일반 계정으로 실행했나 | 3, 6단계 | - |
-| [2/5] | 환경변수 5개가 있고 값이 맞나 | 5단계 | `Key Path Mismatch. Expected: .../api_keys` |
-| [3/5] | `api_keys/secret.key` 내용이 `agent_api_key_test` 인가 | 5단계 | `Missing File: secret.key` |
-| [4/5] | 15034 포트가 비어 있나 | 2, 6단계 | - |
-| [5/5] | 로그 폴더(`/var/log/agent-app`)에 쓸 수 있나 | 4단계 | - |
-
-앞 단계가 틀리면 뒤 단계는 `Skipped due to previous critical failure.`로 건너뛰고 `System Boot Failed`로 꺼집니다. 그래서 **[OK] 5개 = 3~5단계 세팅이 맞다는 증거**입니다.
-
-### 역할 ② 연습 상대: READY 뒤에 계속 하는 일
-
-| 하는 일 | 확인한 내용 | monitor.sh와의 관계 |
+| 과제 요구사항 | 결과 | 증거 |
 |---|---|---|
-| 15034 포트 열기 | `ss -ltn`에 `0.0.0.0:15034 LISTEN`이 보임. `curl`로 요청하면 응답 없이 시간 초과 → **열어 두기만 하고 응답은 안 함** | "포트가 열려 있나" 점검 대상 |
-| CPU · 메모리 부하 반복 | 아래 그림. 약 102초마다 한 바퀴 | CPU 20% · MEM 10% **경고가 실제로 뜨게** 만듦 |
-| 우선순위 낮추기 | 로그 `[SafetyGuard] Process priority lowered (nice=10)`, `ps`에서 NI=10 | 부하를 줘도 다른 프로그램(sshd, cron)을 방해하지 않게 |
-| 자기 로그 쓰기 | 화면과 `/var/log/agent-app/agent_app.log`에 1분에 약 3.3KB | 로그가 쌓이는 속도 문제 ([evaluation.md 4-3](docs/evaluation.md#4-3-로그가-급증해-디스크가-가득-찰-위험-단기--중기-대응)) |
+| SSH 포트 20022, root 원격 로그인 차단 | ✅ | [1-1](docs/images/evidence/1-1_sshd_rules.png) · [1-2](docs/images/evidence/1-2_sshd_listen.png) · [1-3](docs/images/evidence/1-3_root_denied.png) |
+| UFW 활성화, 20022/tcp · 15034/tcp만 허용 | ✅ | [2](docs/images/evidence/2_ufw_status.png) |
+| 계정 3개, 그룹 2개 (common: 3명 / core: admin · dev) | ✅ | [3](docs/images/evidence/3_id_groups.png) |
+| upload_files = common R/W, api_keys · 로그 폴더 = core만 R/W | ✅ | [4-1](docs/images/evidence/4-1_dirs.png) · [4-2](docs/images/evidence/4-2_test_denied.png) · [4-3](docs/images/evidence/4-3_dev_allowed.png) |
+| 환경변수 5개, 키 파일 `agent_api_key_test` | ✅ | [5-1](docs/images/evidence/5-1_env.png) · [5-2](docs/images/evidence/5-2_keys.png) |
+| 일반 계정으로 실행, Boot 5단계 [OK], Agent READY, 0.0.0.0:15034 | ✅ | [6](docs/images/evidence/6_boot_ready.png) · [6-2](docs/images/evidence/6-2_app_listen.png) |
+| monitor.sh: agent-dev 소유, agent-core 그룹, 750 | ✅ | [7-1](docs/images/evidence/7-1_monitor_perm.png) |
+| 점검 → 수집 → 경고 → 기록, 앱 · 포트 비정상 시 exit 1, 방화벽 꺼짐은 경고만 | ✅ | [7-2](docs/images/evidence/7-2_monitor_ok.png) · [7-3](docs/images/evidence/7-3_monitor_fw_warn.png) · [7-4](docs/images/evidence/7-4_monitor_fail.png) |
+| agent-admin crontab 매분 실행, monitor.log 지정 포맷으로 자동 누적 | ✅ | [8-1](docs/images/evidence/8-1_crontab.png) · [8-2](docs/images/evidence/8-2_monitor_log.png) |
+| monitor.log 용량 관리 10MB / 10개 | ✅ | [8-3](docs/images/evidence/8-3_logrotate_conf.png) · [8-4](docs/images/evidence/8-4_logrotate_dryrun.png) |
+| 스크립트는 Bash로만, sudo는 필요할 때만 | ✅ | monitor.sh는 순수 Bash, sudo는 `ufw status` 한 줄에만 |
 
-![부하 한 주기](docs/images/app_cycle.svg)
-
-| 구간 | 메모리 | CPU |
-|---|---|---|
-| 올리기 (0~56초) | 단계마다 **+25MB**, 최대 약 275MB | 단계(Lv) 1→10. 단계마다 코어 1개를 Lv초(최대 5초) 쓰고 1초 쉼 |
-| 내리기 (56~102초) | 단계마다 **-25MB**, 0MB까지 | 단계 9→0 |
-| 그 뒤 | 처음부터 다시 반복 (Ctrl+C로 끌 때까지) | |
-
-- **monitor.sh의 CPU 값이 매번 다른 이유:** monitor.sh는 1초만 잽니다. 그 1초가 앱이 코어를 쓰는 순간이면 높고, 쉬는 순간이면 낮습니다. 2코어 테스트 환경에서는 1.0% ~ 21.0%가 나왔습니다.
-- **MEM 경고가 뜨는지는 VM 메모리 크기에 따라 다릅니다.** 275MB는 8GB의 약 3%, 4GB의 약 7%입니다. 여기에 OS가 쓰는 양이 더해집니다.
-
-### 그 밖에 알아둘 점
-
-| 내용 | 설명 |
-|---|---|
-| 프로세스가 2개 | 파이썬 프로그램을 실행 파일 하나로 묶은 것(PyInstaller, 안에 Python 3.10)이라 **부모가 압축을 풀고 자식이 실제로 일합니다.** 포트도 자식이 엽니다 |
-| 과제 문서와 다른 점 | `AGENT_KEY_PATH`는 **폴더**, 키 파일 이름은 **`secret.key`** ([5단계](#5단계-환경변수--키-파일)) |
-| 끄는 방법 | 실행한 터미널에서 Ctrl+C |
+> **과제 문서와 다르게 한 점:** 제공 앱이 `AGENT_KEY_PATH`를 **폴더**(`.../api_keys`)로, 키 파일 이름을 **`secret.key`**로 요구합니다. 문서대로 하면 Boot [2/5], [3/5]가 FAIL이라 앱을 따랐고, 문서의 `t_secret.key`도 함께 만들어 두었습니다. ([자세히](docs/concepts.md#6-환경변수와-키-파일))
 
 ---
 
-## 실습 환경: 왜 UTM VM인가
+## 단계별 수행 내역
 
-**먼저 분명히 할 점: 과제는 UTM을 요구하지 않습니다.** 과제 문서에는 "Ubuntu 22.04 LTS 또는 동등 리눅스 환경, 이전 미션의 실습 환경(컨테이너/VM) 사용 권장"이라고만 되어 있습니다.
-그래서 이 과제가 실제로 요구하는 것에서 **기준 5개**를 뽑고, Mac M칩에서 쓸 수 있는 방식들을 비교해서 골랐습니다.
-
-| 기준 | 왜 필요한가 (과제 요구사항 근거) |
-|---|---|
-| ① 진짜 서버처럼 동작 (systemd) | sshd · ufw · cron이 **부팅할 때 서비스로 켜져야** 합니다. 1단계 `systemctl restart ssh`, 2단계 "재부팅해도 켜짐", 8단계 "cron이 1분마다 실행"이 모두 여기에 달려 있습니다 |
-| ② M칩에서 빠르게 (ARM 그대로) | M칩은 ARM입니다. ARM용 Ubuntu와 `agent-app-linux-arm64`를 쓰면 번역(에뮬레이션) 없이 바로 돌아갑니다 |
-| ③ SSH가 잠겨도 콘솔로 복구 | 1~2단계는 **SSH 포트와 방화벽을 바꾸는 작업**이라 실수하면 SSH로 못 들어갑니다. 이때 VM 화면(콘솔)으로 직접 로그인해 고칠 수 있어야 합니다 |
-| ④ 무료 | 과제에 비용을 쓰지 않기 위해서입니다 |
-| ⑤ 평가 때 내 Mac에서 시연 | 평가 때 앱 실행, monitor.sh, 로그 증가를 바로 보여 줄 수 있어야 합니다 |
-
-![실습 환경 비교](docs/images/env_choice.svg)
-
-**결론**
-- 기준 5개를 모두 채우는 것은 **UTM**입니다. 무료(오픈소스)이고, M칩에서 ARM 리눅스를 가상화로 바로 돌리고, VM 화면이 있어 SSH가 막혀도 들어갈 수 있습니다.
-- **VMware Fusion, VirtualBox 7.1+도 이 과제를 하기에 충분합니다.** 이미 쓰고 있다면 그대로 써도 됩니다. README의 명령은 Ubuntu 안에서 실행하므로 똑같이 적용됩니다.
-
-**이전 미션의 Docker 환경을 그대로 쓰지 않은 이유** (과제 문서는 재사용을 권장함)
-
-이 저장소를 만들 때 쓴 테스트 환경은 systemd가 없는 컨테이너 방식이었습니다. 거기서 실제로 이런 일이 있었습니다.
-
-| 일어난 일 | 과제에 미치는 영향 |
-|---|---|
-| 환경이 다시 시작되자 sshd와 cron이 **꺼진 채로** 올라옴 | 매번 손으로 켜야 함. 켜는 걸 잊으면 1분마다 기록이 쌓이지 않음 (평가 1-7 실패) |
-| 설정 파일은 `ENABLED=yes`인데 `ufw status`는 **inactive** | 방화벽 규칙이 자동으로 올라오지 않음 (평가 1-2 실패) |
-
-일반 VM에서는 systemd가 부팅 때 이 서비스들을 자동으로 켜 주므로 이런 문제가 없습니다. 이것이 컨테이너 대신 VM을 고른 근거입니다.
-
----
-
-## 실행 흐름
-
-각 단계는 **개념 → 명령 → 확인 → 실제 출력** 순서입니다. 명령은 sudo를 쓸 수 있는 **내 계정**에서 실행하고, 계정을 바꿔야 할 때만 `sudo -iu 계정` 으로 바꿉니다.
+> `[Mac]` = Mac 터미널, 나머지는 VM 안. 명령은 sudo가 되는 내 계정(`arang`)에서 실행하고, `agent-admin`이 필요할 때만 `sudo -iu agent-admin`으로 바꿉니다.
 
 ### 0단계. 준비
 
-**0-1. VM 만들기 (Mac M칩 + UTM)** ([왜 UTM인가](#실습-환경-왜-utm-vm인가))
-
-| 순서 | 할 일 |
-|---|---|
-| 1 | [mac.getutm.app](https://mac.getutm.app)에서 UTM을 받아 설치 (무료) |
-| 2 | Ubuntu Server 22.04 **arm64** 설치 파일(`ubuntu-22.04.5-live-server-arm64.iso`)을 받음. Desktop 말고 Server, amd64 말고 arm64 |
-| 3 | UTM → `+` → **Virtualize** → Linux → 받은 iso 선택. 메모리 4GB, 디스크 20GB, 네트워크는 기본값(Shared Network) |
-| 4 | Ubuntu 설치: 언어 English, 여기서 만드는 계정이 아래의 **"내 계정"**(sudo 가능). **Install OpenSSH server 체크** |
-| 5 | 설치 후 재부팅 화면에서 설치 화면이 또 나오면 VM을 끄고 CD/DVD를 **Clear** 한 뒤 다시 켬 |
-| 6 | VM 화면에서 `ip -4 addr show`로 주소(예: 192.168.64.x) 확인 → Mac 터미널에서 `ssh 내계정@주소`로 접속 (이후 작업은 복사 · 붙여넣기가 되는 Mac 터미널에서) |
-| 7 | 앱 파일 보내기: Mac 터미널에서 `scp ~/Downloads/agent-app-linux-arm64 내계정@주소:~/` |
-
-**0-2. 저장소 받기, 프로그램 설치** (VM 안에서)
+UTM으로 Ubuntu VM을 만들고, Mac 터미널에서 접속해 작업합니다. ([VM을 고른 이유와 만드는 순서](docs/concepts.md#3-실습-환경-왜-utm-vm인가))
 
 ```bash
-# 저장소 받기
-git clone https://github.com/codewhite7777/codyssey_B4-1.git
-cd codyssey_B4-1
+ssh arang@192.168.64.2                                                     # [Mac] VM 접속
+scp ~/Downloads/agent-app/agent-app-linux-x86 arang@192.168.64.2:~/       # [Mac] 앱 파일 보내기
 
-# 필요한 프로그램 설치 (대부분 이미 있음)
-sudo apt update
-sudo apt install -y openssh-server ufw acl cron logrotate
+sudo timedatectl set-timezone Asia/Seoul
+git clone https://github.com/codewhite7777/codyssey_B4-1.git && cd codyssey_B4-1
+sudo apt update && sudo apt install -y openssh-server ufw acl cron logrotate
 ```
-
-| 설치한 것 | 왜 |
-|---|---|
-| openssh-server | SSH 접속을 받는 프로그램 (sshd) |
-| ufw | 방화벽 (Ubuntu 기본, 명령이 짧아서 firewalld 대신 선택) |
-| acl | `setfacl`, `getfacl` 명령 |
-| cron, logrotate | 자동 실행, 로그 용량 관리 |
 
 ---
 
-### 1단계. SSH 잠그기 (포트 20022, root 원격 접속 차단)
+### 1단계. SSH 잠그기
+
+SSH 문 번호를 22 → **20022**로 옮기고, **root 원격 로그인을 막습니다.** 봇이 노리는 "22번 + root" 조합을 둘 다 없앱니다. ([위협 모델](docs/concepts.md#4-ssh와-방화벽))
 
 ![SSH 위협 모델](docs/images/ssh.svg)
 
-**개념**: 인터넷에는 22번 포트에 `root` + 흔한 비밀번호를 자동으로 넣어 보는 봇이 많습니다.
-문 번호를 바꾸면(20022) 그런 무작위 시도가 줄고, root 접속을 막으면(PermitRootLogin no) 비밀번호를 맞혀도 root로는 못 들어옵니다.
-
-> ⚠️ **잠기지 않게 순서 주의**
-> - root를 막기 전에 **일반 계정(내 계정)으로 로그인되는지** 먼저 확인합니다.
-> - UFW가 **이미 켜져 있다면** 2단계의 `sudo ufw allow 20022/tcp`를 먼저 하고 SSH를 재시작합니다.
-
 ```bash
-# 1) 원본 백업
 sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
-
-# 2) 두 줄 수정: "#Port 22" → "Port 20022", "#PermitRootLogin ..." → "PermitRootLogin no"
-sudo nano /etc/ssh/sshd_config
-#   (nano 대신 한 줄로 하려면)
-#   sudo sed -i 's/^#\?Port .*/Port 20022/; s/^#\?PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
-
-# 3) 문법 검사 → 아무것도 안 나오면 정상
-sudo sshd -t
-
-# 4) 재시작
-sudo systemctl restart ssh
-#   Ubuntu 24.04 이상(ssh.socket 사용)이면:
-#   sudo systemctl daemon-reload && sudo systemctl restart ssh.socket
+sudo sed -i 's/^#\?Port .*/Port 20022/; s/^#\?PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
+sudo sshd -t && sudo systemctl restart ssh        # 문법 검사 후 재시작 (기존 창은 닫지 않음)
+ssh -p 20022 arang@192.168.64.2                   # [Mac] 새 창에서 새 포트로 접속되는지 확인
 ```
 
-**확인**
+**📸 1-1** 적용된 규칙: `port 20022`, `permitrootlogin no`
 
-```console
-$ grep -nE "^Port|^PermitRootLogin" /etc/ssh/sshd_config
-23:Port 20022
-42:PermitRootLogin no
+![증거 1-1](docs/images/evidence/1-1_sshd_rules.png)
 
-$ sudo sshd -T | grep -E "^port |^permitrootlogin "     # 실제로 적용된 값
-port 20022
-permitrootlogin no
+**📸 1-2** sshd가 20022번에서 LISTEN
 
-$ sudo ss -tulnp | grep sshd
-tcp   LISTEN 0      128          0.0.0.0:20022      0.0.0.0:*    users:(("sshd",pid=1249,fd=3))
+![증거 1-2](docs/images/evidence/1-2_sshd_listen.png)
 
-$ ssh -p 20022 root@localhost          # root는 비밀번호를 맞혀도 거절
-Permission denied, please try again.
+**📸 1-3** Mac에서 root로 접속하면 `Permission denied`
 
-$ ssh -p 20022 agent-admin@localhost whoami   # 일반 계정은 접속됨 (3단계 이후 확인)
-agent-admin
-
-$ ssh -p 22 agent-admin@localhost      # 옛 포트는 닫힘
-ssh: connect to host localhost port 22: Connection refused
-```
-
-**📸 내 VM 실제 화면 (증거 1)**
-
-1-1. sshd가 실제로 적용 중인 규칙: `port 20022`, `permitrootlogin no`
-
-![증거 1-1: sshd 적용 규칙](docs/images/evidence/1-1_sshd_rules.png)
-
-1-2. 20022번 문이 실제로 열려 있음: `LISTEN` · `20022` · `sshd`
-
-![증거 1-2: sshd 20022 LISTEN](docs/images/evidence/1-2_sshd_listen.png)
-
-1-3. Mac에서 root로 접속하면 거절됨: `Permission denied`
-
-![증거 1-3: root 접속 거절](docs/images/evidence/1-3_root_denied.png)
-
-| 확인 방법 | 무엇을 보나 |
-|---|---|
-| `grep` | 설정 **파일**에 적힌 값 |
-| `sshd -T` | sshd가 **실제로 쓰는** 최종 값 (다른 설정 파일에 덮여 있지 않은지) |
-| `ss -tulnp` | sshd가 정말 **20022에서 기다리는지(LISTEN)** |
-
-> Mac에서 VM으로 접속할 때는 `ssh -p 20022 내계정@VM주소` 처럼 포트를 붙입니다. (UTM 기본 네트워크는 Mac에서 VM 주소로 바로 접속되므로 포트 포워딩이 필요 없습니다. VirtualBox의 NAT를 쓴다면 포트 포워딩을 22 대신 **20022**로 바꿉니다.)
+![증거 1-3](docs/images/evidence/1-3_root_denied.png)
 
 ---
 
-### 2단계. 방화벽 켜기 (20022/tcp, 15034/tcp만 허용)
+### 2단계. 방화벽 켜기
+
+**기본은 전부 막고**, SSH(20022)와 앱(15034)만 엽니다. 허용 명단을 먼저 넣고 **켜기는 맨 마지막**에 합니다(순서가 바뀌면 SSH가 막힘).
 
 ![방화벽](docs/images/firewall.svg)
 
-**개념**: 방화벽은 "기본은 전부 막고, 필요한 문만 연다"가 원칙입니다. 열린 문이 적을수록 공격받을 곳(공격 면)이 줄어듭니다.
-
 ```bash
-sudo ufw default deny incoming      # 들어오는 것: 기본 차단
-sudo ufw default allow outgoing     # 나가는 것: 기본 허용 (업데이트 등)
-sudo ufw allow 20022/tcp            # SSH
-sudo ufw allow 15034/tcp            # 앱
-sudo ufw enable                     # 켜기 (재부팅해도 켜짐)
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow 20022/tcp
+sudo ufw allow 15034/tcp
+sudo ufw show added          # 켜기 전 명단 확인
+sudo ufw enable
 ```
 
-> 예전에 `ufw allow OpenSSH`나 `22`를 허용한 적이 있으면 `sudo ufw status numbered`로 번호를 보고 `sudo ufw delete 번호`로 지웁니다. **허용 목록은 딱 2줄**이어야 합니다.
+**📸 2** `Status: active`, `deny (incoming)`, 허용은 20022 · 15034만
 
-**확인**
-
-```console
-$ sudo ufw status verbose
-Status: active
-Logging: on (low)
-Default: deny (incoming), allow (outgoing), disabled (routed)
-New profiles: skip
-
-To                         Action      From
---                         ------      ----
-20022/tcp                  ALLOW IN    Anywhere
-15034/tcp                  ALLOW IN    Anywhere
-```
-
-(IPv6가 켜진 환경이면 같은 규칙이 `(v6)`로 한 번 더 보입니다. 정상입니다.)
-
-**📸 내 VM 실제 화면 (증거 2)**: `Status: active`, `Default: deny (incoming)`, 허용 목록에 20022 · 15034만
-
-![증거 2: UFW 상태](docs/images/evidence/2_ufw_status.png)
+![증거 2](docs/images/evidence/2_ufw_status.png)
 
 ---
 
-### 3단계. 계정 · 그룹 만들기
+### 3단계. 계정 · 그룹
+
+사람 3명(계정)을 만들고, 권한을 나눠 줄 명단 2개(그룹)에 넣습니다. **그룹에는 상하 관계가 없어서** admin · dev는 두 그룹에 각각 넣습니다. ([계정과 그룹의 차이](docs/concepts.md#5-계정--그룹--권한))
 
 ![계정과 그룹](docs/images/users_groups.svg)
 
-**개념: 계정과 그룹은 무엇이 다른가**
-
-| | 계정 | 그룹 |
-|---|---|---|
-| 무엇 | **사람 한 명** | **사람들의 명단** |
-| 로그인 | 할 수 있음 (아이디, 비밀번호, 홈 폴더) | 못 함 |
-| 이 과제 | agent-admin, agent-dev, agent-test | agent-common, agent-core |
-
-**왜 그룹이 필요한가**: 리눅스는 파일마다 권한 칸이 **[주인 1명] [그룹 1개] [나머지 모두]** 3칸뿐입니다.
-주인 칸에는 한 명만 들어가므로 "admin과 dev 둘 다, 하지만 test는 빼고"를 하려면 **둘이 들어 있는 그룹을 그룹 칸에** 넣어야 합니다.
-그룹 없이 "나머지" 칸을 열면 test까지 같이 들어옵니다. 사람이 늘어도 그룹에 넣기만 하면 같은 권한을 받으니 관리도 쉽습니다.
-
-**누가 어느 그룹에 들어가나**
-
-| 계정 | agent-common (공용) | agent-core (핵심) | 넣는 명령 |
-|---|---|---|---|
-| agent-admin | ✅ | ✅ | `sudo usermod -aG agent-common,agent-core agent-admin` |
-| agent-dev | ✅ | ✅ | `sudo usermod -aG agent-common,agent-core agent-dev` |
-| agent-test | ✅ | ❌ | `sudo usermod -aG agent-common agent-test` |
-
-- **그룹에는 상하 관계가 없습니다.** core에 넣었다고 common에 자동으로 들어가지 않으므로, admin과 dev는 두 그룹에 **각각** 넣습니다.
-- 계정을 만들면 **같은 이름의 개인 그룹**(예: `agent-admin` 그룹)이 자동으로 생깁니다. 본인만 들어 있는 그룹이라 이 과제에서는 신경 쓰지 않습니다. 이 과제의 그룹은 common과 core **두 개뿐**입니다.
-
 ```bash
-# 계정 3개 (-m: 홈 폴더 생성, -s: 기본 셸)
 sudo useradd -m -s /bin/bash agent-admin
 sudo useradd -m -s /bin/bash agent-dev
 sudo useradd -m -s /bin/bash agent-test
-# sudo passwd agent-admin          # (선택) agent-admin으로 직접 SSH 접속할 때만. 이 과제는 sudo -iu로 바꿔 쓰므로 필요 없음
-
-# 그룹 2개
 sudo groupadd agent-common
 sudo groupadd agent-core
-
-# 그룹에 넣기 (-aG: 기존 그룹은 유지하고 추가)
 sudo usermod -aG agent-common,agent-core agent-admin
 sudo usermod -aG agent-common,agent-core agent-dev
-sudo usermod -aG agent-common            agent-test
+sudo usermod -aG agent-common agent-test
 ```
 
-> `-a` 없이 `-G`만 쓰면 **기존 그룹이 다 빠지고** 적은 그룹만 남습니다. 꼭 `-aG`.
+**📸 3** admin · dev는 common과 core, test는 common만 (맨 앞 같은 이름 그룹은 자동으로 생긴 개인 그룹)
 
-**확인**
-
-```console
-$ id agent-admin
-uid=30033(agent-admin) gid=30033(agent-admin) groups=30033(agent-admin),30036(agent-common),30037(agent-core)
-$ id agent-dev
-uid=30034(agent-dev) gid=30034(agent-dev) groups=30034(agent-dev),30036(agent-common),30037(agent-core)
-$ id agent-test
-uid=30035(agent-test) gid=30035(agent-test) groups=30035(agent-test),30036(agent-common)
-```
-
-**📸 내 VM 실제 화면 (증거 3)**: admin · dev는 agent-common과 agent-core, test는 agent-common만
-
-![증거 3: id로 본 계정과 그룹](docs/images/evidence/3_id_groups.png)
-
-> `groups=` 맨 앞의 같은 이름 그룹(`agent-admin` 등)은 계정을 만들 때 자동으로 생긴 **개인 그룹**입니다. 그래서 시스템에는 그룹이 5개(개인 그룹 3 + 만든 그룹 2) 있지만, 이 과제에서 만들고 권한에 쓰는 그룹은 **agent-common, agent-core 2개**입니다.
+![증거 3](docs/images/evidence/3_id_groups.png)
 
 ---
 
-### 4단계. 폴더 · 권한 정하기 (공유 폴더 vs 보안 폴더)
+### 4단계. 폴더 · 권한
 
-![폴더 구조](docs/images/dir_tree.svg)
-
-**권한 숫자 읽는 법**
-
-![권한 숫자](docs/images/rwx.svg)
-
-**정책**: `upload_files`는 세 명 모두 쓰는 **공유 폴더**, `api_keys`와 로그 폴더는 `agent-core`만 쓰는 **보안 폴더**입니다.
+`upload_files`는 3명이 함께 쓰는 **공용** 폴더, `api_keys`와 로그 폴더는 admin · dev만 쓰는 **보안** 폴더입니다(최소 권한 원칙). ([권한 숫자 · setgid · ACL](docs/concepts.md#권한-숫자--setgid--acl))
 
 ![누가 어디에 접근하나](docs/images/permissions.svg)
 
+| 폴더 | 주인:그룹 | 권한 | 의미 |
+|---|---|---|---|
+| `agent-app` ($AGENT_HOME) | agent-admin:agent-common | `750` | 3명 모두 들어올 수 있음, 바깥은 막힘 |
+| `upload_files` | agent-admin:agent-common | `2770` + 기본 ACL | 3명 모두 읽기 · 쓰기 |
+| `api_keys` | agent-admin:agent-core | `2770` | admin · dev만 |
+| `bin` | agent-dev:agent-core | `750` | dev가 만들고 admin은 실행만 |
+| `/var/log/agent-app` | agent-admin:agent-core | `2770` + 기본 ACL | admin · dev만 |
+
 ```bash
-AGENT_HOME=/home/agent-admin/agent-app       # 이 단계에서만 쓰는 임시 변수
+H=/home/agent-admin/agent-app
+sudo mkdir -p $H/upload_files $H/api_keys $H/bin /var/log/agent-app
+sudo setfacl -m g:agent-common:x /home/agent-admin                    # 홈 폴더는 "지나가기"만 허용
 
-# 1) 폴더 만들기
-sudo mkdir -p $AGENT_HOME/upload_files $AGENT_HOME/api_keys $AGENT_HOME/bin /var/log/agent-app
+sudo chown agent-admin:agent-common $H              && sudo chmod 750  $H
+sudo chown agent-admin:agent-common $H/upload_files && sudo chmod 2770 $H/upload_files
+sudo chown agent-admin:agent-core   $H/api_keys     && sudo chmod 2770 $H/api_keys
+sudo chown agent-dev:agent-core     $H/bin          && sudo chmod 750  $H/bin
+sudo chown agent-admin:agent-core   /var/log/agent-app && sudo chmod 2770 /var/log/agent-app
 
-# 2) 홈 폴더 통과 허용 (ACL)
-#    Ubuntu는 홈 폴더가 750이라 dev, test는 /home/agent-admin 안으로 들어갈 수조차 없다.
-#    agent-common에게 "지나가기(x)"만 허용 → 목록 보기(r)는 여전히 불가
-sudo setfacl -m g:agent-common:x /home/agent-admin
-
-# 3) 소유자:그룹, 권한
-sudo chown agent-admin:agent-common $AGENT_HOME               && sudo chmod 750  $AGENT_HOME
-sudo chown agent-admin:agent-common $AGENT_HOME/upload_files  && sudo chmod 2770 $AGENT_HOME/upload_files
-sudo chown agent-admin:agent-core   $AGENT_HOME/api_keys      && sudo chmod 2770 $AGENT_HOME/api_keys
-sudo chown agent-dev:agent-core     $AGENT_HOME/bin           && sudo chmod 750  $AGENT_HOME/bin
-sudo chown agent-admin:agent-core   /var/log/agent-app        && sudo chmod 2770 /var/log/agent-app
-
-# 4) 기본(default) ACL: 앞으로 이 폴더에 생기는 파일도 그룹이 읽고 쓸 수 있게
-sudo setfacl -d -m g:agent-common:rwx $AGENT_HOME/upload_files
+sudo setfacl -d -m g:agent-common:rwx $H/upload_files                 # 앞으로 생길 파일도 그룹이 쓰기 가능
 sudo setfacl -d -m g:agent-core:rw    /var/log/agent-app
 ```
 
-| 설정 | 왜 필요한가 |
-|---|---|
-| `2770`의 앞자리 **2 (setgid)** | 누가 파일을 만들든 **폴더의 그룹**(agent-core 등)을 물려받음. 없으면 만든 사람의 개인 그룹이 되어 다른 사람이 못 씀 |
-| 끝자리 **0** | 그룹 밖의 사람(other)은 아예 못 들어옴 → agent-test는 api_keys, 로그 폴더 불가 |
-| **기본 ACL** (`setfacl -d`) | 새 파일은 보통 `644`(그룹은 읽기만)로 생김. 기본 ACL을 두면 새 파일도 그룹이 **쓰기**까지 가능 → "R/W 가능" 요구 충족 |
-| `bin`의 소유자 **agent-dev** | monitor.sh 작성자가 dev이므로 dev가 이 폴더에 파일을 만들 수 있어야 함 |
+**📸 4-1** 폴더 5개의 주인 · 그룹 · 권한 (`+` = ACL이 걸린 폴더)
 
-**확인**
+![증거 4-1](docs/images/evidence/4-1_dirs.png)
 
-```console
-$ ls -ld $AGENT_HOME $AGENT_HOME/* /var/log/agent-app
-drwxr-x---  5 agent-admin agent-common 4096 Oct 19 01:24 /home/agent-admin/agent-app
-drwxrws---  2 agent-admin agent-core   4096 Oct 19 01:24 /home/agent-admin/agent-app/api_keys
-drwxr-x---  2 agent-dev   agent-core   4096 Oct 19 01:26 /home/agent-admin/agent-app/bin
-drwxrws---+ 2 agent-admin agent-common 4096 Oct 19 01:24 /home/agent-admin/agent-app/upload_files
-drwxrws---+ 2 agent-admin agent-core   4096 Oct 19 01:31 /var/log/agent-app
+**📸 4-2 · 4-3** 같은 비밀 폴더인데 **test는 거절, dev는 통과**
 
-$ getfacl -p /home/agent-admin /var/log/agent-app
-# file: /home/agent-admin
-# owner: agent-admin
-# group: agent-admin
-user::rwx
-group::r-x
-group:agent-common:--x        ← common은 지나가기만
-mask::r-x
-other::---
+![증거 4-2](docs/images/evidence/4-2_test_denied.png)
 
-# file: /var/log/agent-app
-# owner: agent-admin
-# group: agent-core
-# flags: -s-                  ← setgid
-user::rwx
-group::rwx
-other::---
-default:user::rwx
-default:group::rwx
-default:group:agent-core:rw-  ← 새 파일도 core가 읽기·쓰기
-default:mask::rwx
-default:other::---
-```
-
-**📸 내 VM 실제 화면 (증거 4-1)**: 폴더 5개의 주인 · 그룹 · 권한. `+`는 기본 ACL이 걸린 폴더(upload_files, 로그 폴더)
-
-![증거 4-1: 폴더 주인 · 그룹 · 권한](docs/images/evidence/4-1_dirs.png)
-
-| 폴더 | 권한 | 주인 | 그룹 | 의미 |
-|---|---|---|---|---|
-| agent-app | `750` | agent-admin | agent-common | 3명 모두 들어올 수 있음, 바깥은 막힘 |
-| upload_files | `2770` + 기본 ACL | agent-admin | agent-common | 3명 모두 읽기 · 쓰기 (공용) |
-| api_keys | `2770` | agent-admin | agent-core | admin · dev만 (비밀) |
-| bin | `750` | agent-dev | agent-core | dev가 만들고, admin은 실행만 |
-| /var/log/agent-app | `2770` + 기본 ACL | agent-admin | agent-core | admin · dev만 (로그) |
-
-**계정별로 직접 들어가 보기** (정책이 실제로 지켜지는지)
-
-```console
-$ sudo -u agent-test touch $AGENT_HOME/upload_files/from-test.txt    # 공유 폴더: 성공
-$ sudo -u agent-test cat $AGENT_HOME/api_keys/secret.key             # 보안 폴더: 거절 (키는 5단계에서 생성)
-cat: /home/agent-admin/agent-app/api_keys/secret.key: Permission denied
-$ sudo -u agent-test ls /var/log/agent-app
-ls: cannot open directory '/var/log/agent-app': Permission denied
-$ sudo -u agent-dev cat $AGENT_HOME/api_keys/secret.key              # core 멤버: 성공
-agent_api_key_test
-```
-
-| | upload_files 쓰기 | api_keys 읽기 | 로그 폴더 쓰기 |
-|---|---|---|---|
-| agent-admin | ✅ | ✅ | ✅ |
-| agent-dev | ✅ | ✅ | ✅ |
-| agent-test | ✅ | ❌ Permission denied | ❌ Permission denied |
-
-**📸 내 VM 실제 화면 (증거 4-2, 4-3)**: 같은 비밀 폴더(`api_keys`)인데 **test는 거절, dev는 통과**
-
-![증거 4-2: agent-test는 api_keys 거절](docs/images/evidence/4-2_test_denied.png)
-
-![증거 4-3: agent-dev는 api_keys 통과](docs/images/evidence/4-3_dev_allowed.png)
+![증거 4-3](docs/images/evidence/4-3_dev_allowed.png)
 
 ---
 
-### 5단계. 환경변수 + 키 파일
+### 5단계. 환경변수 · 키 파일
+
+앱을 실행할 agent-admin에게 "집은 어디, 문은 몇 번, 키는 어디" 메모(환경변수)를 적어 두고 키 파일을 만듭니다. 앱이 부팅할 때 이 값을 검사합니다.
 
 ![환경변수와 Boot](docs/images/env_boot.svg)
 
-**개념**: 환경변수는 앱에게 건네는 설정 메모입니다. 경로와 포트를 코드에 박지 않고 환경변수로 주면, **누가 실행해도 같은 환경**이 되고 `env` 명령 하나로 **검증**할 수 있습니다.
-앱은 이 값들을 읽어서 부팅할 때 스스로 검사(Boot Sequence)합니다.
-
-> ⚠️ **과제 문서와 실제 앱이 다른 곳 2개** (제공 앱을 실행해서 확인)
->
-> | | 과제 문서 | 실제 앱이 검사하는 값 | 문서대로 하면 나오는 에러 |
-> |---|---|---|---|
-> | `AGENT_KEY_PATH` | `$AGENT_HOME/api_keys/t_secret.key` (파일) | `$AGENT_HOME/api_keys` (**폴더**) | `[2/5] ... [FAIL]`<br>`Key Path Mismatch. Expected: /home/agent-admin/agent-app/api_keys` |
-> | 키 파일 이름 | `t_secret.key` | `secret.key` | `[3/5] ... [FAIL]`<br>`Missing File: secret.key` |
->
-> 성공 기준은 "Boot 5단계 [OK]"이므로 **앱이 검사하는 값을 따릅니다.** 과제 문서의 `t_secret.key`도 같은 내용으로 만들어 두지만, 앱은 이 파일을 읽지 않습니다.
-> 환경변수로 실행 환경을 고정하고 앱이 부팅 때 검증하는 이유가 바로 이것입니다. 값이 틀리면 **앱이 시작 전에 정확히 어디가 틀렸는지** 알려 줍니다.
-
 ```bash
-sudo -iu agent-admin              # 앱을 실행할 계정으로 바꾸기 (-i: 로그인한 것처럼)
-
-# ~/.bashrc 맨 아래에 추가 → 로그인할 때마다 자동 설정
+sudo -iu agent-admin
 cat >> ~/.bashrc <<'EOF'
-
-# ---- agent-app 실행 환경 ----
 export AGENT_HOME=/home/agent-admin/agent-app
 export AGENT_PORT=15034
 export AGENT_UPLOAD_DIR=$AGENT_HOME/upload_files
-export AGENT_KEY_PATH=$AGENT_HOME/api_keys            # 폴더 경로 (앱이 이 안의 secret.key 를 읽음)
+export AGENT_KEY_PATH=$AGENT_HOME/api_keys
 export AGENT_LOG_DIR=/var/log/agent-app
 EOF
-source ~/.bashrc                  # 지금 셸에 바로 적용
-
-# 키 파일 만들기 (내용 1줄)
-echo "agent_api_key_test" > $AGENT_KEY_PATH/secret.key      # 앱이 읽는 파일
-echo "agent_api_key_test" > $AGENT_KEY_PATH/t_secret.key    # 과제 문서에 적힌 파일 (앱은 안 읽음)
-chmod 660 $AGENT_KEY_PATH/*.key   # core 그룹만 읽기·쓰기, 그 외는 없음
+source ~/.bashrc
+echo "agent_api_key_test" > $AGENT_KEY_PATH/secret.key       # 앱이 읽는 파일
+echo "agent_api_key_test" > $AGENT_KEY_PATH/t_secret.key     # 과제 문서에 적힌 이름
+chmod 660 $AGENT_KEY_PATH/*.key
 ```
 
-**확인**
+**📸 5-1** 환경변수 5개 (`AGENT_KEY_PATH`는 폴더)
 
-```console
-$ env | grep ^AGENT_ | sort
-AGENT_HOME=/home/agent-admin/agent-app
-AGENT_KEY_PATH=/home/agent-admin/agent-app/api_keys
-AGENT_LOG_DIR=/var/log/agent-app
-AGENT_PORT=15034
-AGENT_UPLOAD_DIR=/home/agent-admin/agent-app/upload_files
+![증거 5-1](docs/images/evidence/5-1_env.png)
 
-$ cat $AGENT_KEY_PATH/secret.key
-agent_api_key_test
+**📸 5-2** 키 파일 권한 `660`, 그룹은 폴더의 setgid로 자동으로 `agent-core`
 
-$ ls -l $AGENT_KEY_PATH
--rw-rw---- 1 agent-admin agent-core 19 Oct 26 22:43 secret.key       ← 그룹이 agent-core (setgid 덕분)
--rw-rw---- 1 agent-admin agent-core 19 Oct 19 01:24 t_secret.key
-```
-
-**📸 내 VM 실제 화면 (증거 5-1)**: `env | grep ^AGENT_ | sort` 결과, 환경변수 5개 (`AGENT_KEY_PATH`는 폴더)
-
-![증거 5-1: 환경변수 5개](docs/images/evidence/5-1_env.png)
-
-**📸 내 VM 실제 화면 (증거 5-2)**: 키 파일 2개, 권한 `660`, 그룹은 폴더의 setgid로 자동으로 `agent-core`
-
-![증거 5-2: 키 파일 권한](docs/images/evidence/5-2_keys.png)
-
-> **알아두기**: Ubuntu의 `~/.bashrc`는 맨 위에서 "사람이 직접 쓰는 셸이 아니면 읽지 않고 끝" 하도록 되어 있습니다.
-> 그래서 **cron에서는 이 환경변수가 비어 있습니다.** monitor.sh가 `${AGENT_PORT:-15034}`처럼 **기본값**을 둔 이유입니다. ([7단계](#7단계-monitorsh-만들기))
+![증거 5-2](docs/images/evidence/5-2_keys.png)
 
 ---
 
-### 6단계. 앱 실행 (Boot Sequence 5단계 [OK])
+### 6단계. 앱 실행
 
-**개념**: 앱은 **일반 계정(agent-admin)** 으로 실행합니다. root로 실행한 앱에 구멍이 있으면 공격자가 곧바로 root 권한을 얻기 때문입니다.
+제공 앱을 **일반 계정(agent-admin)**으로 실행하면, 1~5단계 세팅이 맞는지 앱이 5가지를 검사합니다. 통과하면 15034를 열고 일부러 CPU · 메모리를 썼다 줄였다 합니다. ([제공 앱은 무엇인가](docs/concepts.md#2-제공-앱은-무엇인가))
+
+![제공 앱이 하는 일](docs/images/app_roles.svg)
 
 ```bash
-# 1) 내 계정에서: 받은 파일을 AGENT_HOME으로 옮기기 (zip이면 unzip 먼저)
-uname -m                          # aarch64 → agent-app-linux-arm64 (Mac M칩 VM), x86_64 → agent-app-linux-x86
-APP=agent-app-linux-arm64         # x86_64면 agent-app-linux-x86
-sudo install -o agent-admin -g agent-admin -m 750 ~/$APP /home/agent-admin/agent-app/$APP
-#   agent-admin은 내 홈 폴더를 읽을 수 없어서, sudo로 복사하면서 소유자와 실행 권한을 한 번에 준다
-
-# 2) agent-admin으로 바꿔서 실행
+exit                                                   # agent-admin → arang
+sudo install -o agent-admin -g agent-admin -m 750 ~/agent-app-linux-x86 /home/agent-admin/agent-app/
 sudo -iu agent-admin
-cd $AGENT_HOME
-./agent-app-linux-arm64           # 이 터미널은 앱이 계속 돌도록 켜 둔다 (종료는 Ctrl+C)
+cd $AGENT_HOME && ./agent-app-linux-x86                # 이 창은 앱 전용으로 켜 둠 (종료: Ctrl+C)
+sudo ss -ltnp | grep 15034                             # [새 창, arang] 포트 확인
 ```
 
-**확인** (제공 앱 실제 출력)
+**📸 6** Boot 5단계 모두 `[OK]` → `Agent READY`, 그 뒤 부하 반복
 
-```text
->>> Starting Agent Boot Sequence...
-[1/5] Checking User Account               [OK]
-   ... Running as service user 'agent-admin' (uid=30033)
-[2/5] Verifying Environment Variables     [OK]
-   ... All required Envs correct
-[3/5] Checking Required Files             [OK]
-   ... Verified 'secret.key' with correct key string.
-[4/5] Checking Port Availability          [OK]
-   ... Port 15034 is available.
-[5/5] Verifying Log Permission            [OK]
-   ... Log directory is writable: /var/log/agent-app
-------------------------------------------------------------
-All Boot Checks Passed!
-Agent READY
-2026-10-26 23:03:35,907 [INFO] [SafetyGuard] Process priority lowered (nice=10).
-2026-10-26 23:03:35,907 [INFO] Agent listening at port 15034
-2026-10-26 23:03:35,908 [INFO] === Agent Worker Started ===
-2026-10-26 23:03:35,908 [INFO]    > Cycle: 0 -> 256MB/Lv10 -> 0
-2026-10-26 23:03:35,908 [INFO] --- Step Info: Mode=UP, CPU Lv=1, Mem=0MB ---
-2026-10-26 23:03:35,931 [INFO] [Memory] Increasing... (+25 MB) Total: 25 MB
-...
-```
+![증거 6](docs/images/evidence/6_boot_ready.png)
 
-**📸 내 VM 실제 화면 (증거 6)**: Boot 5단계 모두 `[OK]` → `Agent READY`, 그 뒤 부하 주기(메모리 25MB씩 → 275MB에서 `PEAK REACHED` → 감소)
+**📸 6-2** 앱이 `0.0.0.0:15034`에서 LISTEN
 
-![증거 6: Boot 5단계 OK, Agent READY](docs/images/evidence/6_boot_ready.png)
-
-**📸 내 VM 실제 화면 (증거 6-2)**: 앱(`agent-app-linux`)이 `0.0.0.0:15034`에서 LISTEN
-
-![증거 6-2: 15034 LISTEN](docs/images/evidence/6-2_app_listen.png)
-
-**Agent READY 다음에 계속 나오는 줄은 정상입니다.** 이 앱은 일부러 **CPU와 메모리를 조금씩 더 쓰는 앱**입니다. 메모리를 0 → 256MB, CPU 사용 단계를 1 → 10까지 올렸다가 다시 0으로 내리기를 반복합니다.
-그래서 7단계의 monitor.sh에서 **CPU 경고가 실제로 뜹니다.** 같은 내용이 `/var/log/agent-app/agent_app.log`에도 쌓입니다.
-
-다른 터미널(SSH 한 번 더 접속)에서 포트와 프로세스를 확인합니다.
-
-```console
-$ ss -ltnp | grep 15034
-LISTEN 0      1            0.0.0.0:15034      0.0.0.0:*    users:(("agent-app-linux",pid=1026,fd=4))
-
-$ pgrep -a -f "^[^ ]*agent-app-linux"
-1024 ./agent-app-linux-x86
-1026 ./agent-app-linux-x86
-```
-
-프로세스가 **2개**인 이유: 제공 앱은 파이썬 프로그램을 실행 파일 하나로 묶은 것(PyInstaller)입니다. **부모(1024)가 압축을 풀고, 자식(1026)이 실제로 일하며 포트를 엽니다.** 부모는 자식이 끝날 때까지 기다리다 함께 끝납니다.
-
-| [OK]가 안 나오면 | 먼저 볼 곳 |
-|---|---|
-| [1/5] | `whoami`가 agent-admin인가 (sudo로 실행하지 않았나) |
-| [2/5] | `env \| grep AGENT_` 값. 특히 `AGENT_KEY_PATH`가 **폴더**(`.../api_keys`)인가 |
-| [3/5] | `cat $AGENT_KEY_PATH/secret.key` 내용이 정확히 `agent_api_key_test` 인가 |
-| [4/5] | `ss -ltnp \| grep 15034` 다른 프로그램(예전에 띄운 앱)이 이미 쓰고 있지 않나 |
-| [5/5] | `ls -ld /var/log/agent-app` 그룹 agent-core, 권한 `rws` 인가 |
+![증거 6-2](docs/images/evidence/6-2_app_listen.png)
 
 ---
 
-### 7단계. monitor.sh 만들기
+### 7단계. monitor.sh
+
+경비원 스크립트를 설치하고 일부러 문제 상황을 만들어 반응을 확인합니다. **서비스가 죽으면 멈추고(exit 1), 아직 돌고 있으면 경고만** 합니다. ([쓴 명령과 이유](docs/concepts.md#7-monitorsh))
 
 ![monitor.sh 순서도](docs/images/monitor_flow.svg)
 
-**개념**: monitor.sh는 경비원입니다. **멈춰야 하는 문제**(앱이 죽음, 포트가 닫힘)는 `exit 1`로 끝내고, **알려만 줄 문제**(방화벽 꺼짐, 자원 많이 씀)는 `[WARNING]`만 출력한 뒤 기록까지 계속합니다.
-
-**설치**: 소유자 agent-dev, 그룹 agent-core, 권한 750 (내 계정에서, 저장소 폴더 안에서)
-
 ```bash
+cd ~/codyssey_B4-1
 sudo install -o agent-dev -g agent-core -m 750 bin/monitor.sh /home/agent-admin/agent-app/bin/monitor.sh
-#   install = 복사(cp) + 소유자/그룹 변경(chown) + 권한 변경(chmod)을 한 번에
-
-# 방화벽 상태 확인용: agent-core 그룹에게 "ufw status" 한 가지만 sudo 허용
-sudo install -o root -g root -m 0440 config/sudoers-agent-monitor /etc/sudoers.d/agent-monitor
-sudo visudo -cf /etc/sudoers.d/agent-monitor     # 문법 검사 → "parsed OK"
+sudo install -o root -g root -m 0440 config/sudoers-agent-monitor /etc/sudoers.d/agent-monitor   # ufw status만 허용
+sudo visudo -cf /etc/sudoers.d/agent-monitor
+sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh; echo "exit=$?"
 ```
 
-```console
-$ ls -l /home/agent-admin/agent-app/bin/monitor.sh
--rwxr-x--- 1 agent-dev agent-core 5108 Oct 26 23:02 /home/agent-admin/agent-app/bin/monitor.sh
+**📸 7-1** monitor.sh: 주인 `agent-dev`, 그룹 `agent-core`, `750`
 
-$ cat /etc/sudoers.d/agent-monitor
-%agent-core ALL=(root) NOPASSWD: /usr/sbin/ufw status
-```
-
-**왜 방화벽 확인에만 sudo가 필요한가**: 방화벽이 실제로 켜져 있는지(규칙이 커널에 올라가 있는지)는 `ufw status`로만 정확히 알 수 있는데, 이 명령은 **root만** 실행할 수 있습니다.
-그래서 sudoers에 **딱 이 명령 하나만**(인자까지 정확히 `status`) 허용했습니다. root 권한 전체를 주지 않는 것도 최소 권한 원칙입니다.
-
-```console
-$ sudo -n /usr/sbin/ufw status | head -1       # agent-admin: 허용된 명령 → 됨
-Status: active
-$ sudo -n /usr/sbin/ufw disable                # 허용 안 된 명령 → 거절
-sudo: a password is required
-```
-
-> 설정 파일 `/etc/ufw/ufw.conf`의 `ENABLED=yes`를 읽으면 sudo 없이도 되지만, 이건 "켜기로 **설정**됨"일 뿐입니다.
-> 테스트 환경에서 재부팅 뒤 방화벽 규칙이 올라오지 않았을 때 `ENABLED=yes`인데도 `ufw status`는 `inactive`였습니다. 그대로 두면 방화벽이 꺼졌는데 `[OK]`가 나옵니다. 그래서 실제 상태를 보는 방법을 썼습니다.
-
-**📸 내 VM 실제 화면 (증거 7-1)**: monitor.sh 주인 `agent-dev`, 그룹 `agent-core`, 권한 `750`
-
-![증거 7-1: monitor.sh 권한](docs/images/evidence/7-1_monitor_perm.png)
-
-| 누가 | 권한 칸 | 할 수 있는 것 |
-|---|---|---|
-| agent-dev (소유자) | `rwx` | 읽기, **수정**, 실행 |
-| agent-admin (agent-core 그룹) | `r-x` | 읽기, **실행** → cron이 돌릴 수 있음. 수정은 불가 |
-| agent-test (그 외) | `---` | 아무것도 못 함 (`Permission denied`) |
-
-**스크립트가 하는 일** ([전체 코드](bin/monitor.sh), 주석 포함 100줄 남짓)
-
-| 순서 | 무엇을 | 쓴 명령 | 왜 이 명령 |
-|---|---|---|---|
-| ① | 앱 프로세스 확인 | `pgrep -o -f '^[^ ]*agent-app-linux'` | 결과가 바로 **PID**라 로그에 쓰기 좋음. `^[^ ]*` = 명령줄의 **첫 단어**(실제로 실행된 프로그램)가 앱일 때만 찾음 → x86, arm64 둘 다 찾고, `vim agent-app-linux-x86`처럼 이름만 들어간 다른 프로세스는 안 걸림. `-o` = 부모·자식 2개 중 먼저 뜬 부모 |
-| ② | 15034 LISTEN 확인 | `ss -ltn` → 4번째 칸이 `:15034`로 끝나는지 | netstat의 후속 도구로 Ubuntu에 기본 설치. `-l` LISTEN만, `-t` TCP만, `-n` 숫자로 |
-| ③ | 방화벽 켜짐 확인 | `sudo -n /usr/sbin/ufw status` → `Status: active` | 실제로 켜졌는지 정확히 보는 명령. sudoers로 이것만 허용. `-n`은 비밀번호를 묻지 않음 (cron엔 입력할 사람이 없음) |
-| ④ | CPU | `/proc/stat` 을 1초 간격 두 번 읽기 | 부팅 후 누적 시간이라, 두 번 읽은 **차이**로 "그 1초 동안 쉬지 않은 비율"을 계산 |
-| ④ | MEM | `free` → `used / total × 100` | Mem 줄 한 줄이면 끝 |
-| ④ | DISK | `df -P /` → Use% 칸 | `-P`는 한 줄 출력 고정 → 칸 위치가 항상 같아 파싱이 안전 |
-| ⑤ | 임계값 | `awk`로 소수 비교 | bash의 `[ ]`는 정수만 비교 가능 (`25.3 > 20` 불가) |
-| ⑥ | 기록 | `echo "..." >> monitor.log` | `>>` = 이어쓰기 ([evaluation.md 항목 3](docs/evaluation.md#3-4-리다이렉션-덮어쓰기-vs-이어쓰기)) |
-
-**로그 포맷**: `[YYYY-MM-DD HH:MM:SS] PID:... CPU:..% MEM:..% DISK_USED:..%`
-한 줄 = 한 번의 측정, 칸 순서가 항상 같아서 `grep`(특정 시각 찾기), `awk`(평균 계산)로 바로 꺼내 쓸 수 있습니다.
-
-**실행 확인 1: 정상 + 임계값 초과 → 경고만, 기록은 계속** (앱 실행 중, agent-admin으로)
-
-제공 앱이 CPU를 일부러 쓰기 때문에, 앱이 돌고 있으면 CPU 경고가 자주 뜹니다. **경고가 떠도 `exit=0`이고 기록까지 끝까지 갑니다.**
-
-```console
-$ /home/agent-admin/agent-app/bin/monitor.sh; echo "exit=$?"
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-app-linux'... [OK] (PID: 202)
-Checking port 15034... [OK]
-Checking firewall (ufw)... [OK] active
-
-[RESOURCE MONITORING]
-CPU Usage : 20.5%
-MEM Usage : 8.5%
-DISK Used : 32%
-
-[WARNING] CPU threshold exceeded (20.5% > 20%)
-[INFO] Log appended: /var/log/agent-app/monitor.log
-exit=0
-```
-
-CPU 값은 실행할 때마다 다릅니다. 앱이 몇 초씩 CPU를 썼다 쉬었다 하고, monitor.sh는 **그 순간의 1초**만 재기 때문입니다.
-
-**📸 내 VM 실제 화면 (증거 7-2)**: 점검 3개 `[OK]`, 메모리 기준 초과로 `[WARNING] MEM threshold exceeded (12.7% > 10%)`, 그래도 로그 기록 후 `exit=0`
-
-![증거 7-2: monitor.sh 정상 + MEM 경고](docs/images/evidence/7-2_monitor_ok.png)
-
-**실행 확인 2: 방화벽 끔 → 경고만, 기록은 계속** (`sudo ufw disable` 후, 확인 뒤 `sudo ufw enable`)
-
-```console
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-app-linux'... [OK] (PID: 202)
-Checking port 15034... [OK]
-[WARNING] Firewall (ufw) is not active
-
-[RESOURCE MONITORING]
-CPU Usage : 11.4%
-MEM Usage : 8.3%
-DISK Used : 32%
-
-[INFO] Log appended: /var/log/agent-app/monitor.log
-exit=0
-```
-
-**📸 내 VM 실제 화면 (증거 7-3)**: `sudo ufw disable` 후 실행 → `[WARNING] Firewall (ufw) is not active`, 그래도 측정 · 기록 후 `exit=0`
-
-![증거 7-3: 방화벽 꺼짐 경고](docs/images/evidence/7-3_monitor_fw_warn.png)
-
-**실행 확인 3: 앱 종료(Ctrl+C) → exit 1**
-
-```console
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-app-linux'... [FAIL] not running
-exit=1
-```
-
-**📸 내 VM 실제 화면 (증거 7-4)**: 앱을 Ctrl+C로 끈 뒤 실행 → `[FAIL] not running`, 바로 멈추고 `exit=1`
-
-![증거 7-4: 앱 종료 → exit 1](docs/images/evidence/7-4_monitor_fail.png)
+![증거 7-1](docs/images/evidence/7-1_monitor_perm.png)
 
 | 상황 | monitor.sh 반응 | 종료 코드 | 증거 |
 |---|---|---|---|
 | 정상 (MEM 기준 초과) | 경고만, 기록함 | `exit=0` | 7-2 |
-| 방화벽 꺼짐 | 경고만, 기록함 | `exit=0` | 7-3 |
-| 앱 죽음 | `[FAIL]`, 바로 멈춤 | `exit=1` | 7-4 |
+| 방화벽 꺼짐 (`sudo ufw disable`) | 경고만, 기록함 | `exit=0` | 7-3 |
+| 앱 죽음 (탭 1에서 Ctrl+C) | `[FAIL]`, 바로 멈춤 | `exit=1` | 7-4 |
 
-앱 이름이 명령줄 **중간에만** 들어간 다른 프로세스가 있어도 앱으로 착각하지 않는지 확인한 결과입니다.
+**📸 7-2** 점검 3개 `[OK]`, `MEM threshold exceeded (12.7% > 10%)`, `exit=0`
 
-```console
-$ pgrep -a -f agent-app-linux                  # 단순 패턴: 앱이 아닌데 걸림
-1044 bash -c sleep 30; true viewing-./agent-app-linux-x86
-$ pgrep -a -f "^[^ ]*agent-app-linux"          # monitor.sh 패턴: 안 걸림 → [FAIL] exit=1
-```
+![증거 7-2](docs/images/evidence/7-2_monitor_ok.png)
 
-**실행 확인 4: 프로세스는 있는데 포트가 안 열림 → exit 1**
+**📸 7-3** 방화벽을 끈 뒤 `[WARNING] Firewall (ufw) is not active`, 그래도 `exit=0` (확인 후 `sudo ufw enable`)
 
-실제 앱으로는 이 상태를 만들기 어려워서, `sleep`을 앱 이름(`./agent-app-linux-x86`)으로 띄워 **모의로** 만들었습니다.
+![증거 7-3](docs/images/evidence/7-3_monitor_fw_warn.png)
 
-```console
-$ bash -c 'exec -a ./agent-app-linux-x86 sleep 90' &     # 이름만 앱, 포트는 안 엶
-$ /home/agent-admin/agent-app/bin/monitor.sh; echo "exit=$?"
-====== SYSTEM MONITOR RESULT ======
+**📸 7-4** 앱을 끈 뒤 `[FAIL] not running`, `exit=1`
 
-[HEALTH CHECK]
-Checking process 'agent-app-linux'... [OK] (PID: 990)
-Checking port 15034... [FAIL] not listening
-exit=1
-```
-
-**실행 확인 5: agent-test는 실행 불가**
-
-```console
-$ sudo -iu agent-test /home/agent-admin/agent-app/bin/monitor.sh
--bash: line 1: /home/agent-admin/agent-app/bin/monitor.sh: Permission denied
-```
+![증거 7-4](docs/images/evidence/7-4_monitor_fail.png)
 
 ---
 
-### 8단계. cron으로 1분마다 + logrotate로 용량 관리
+### 8단계. cron · logrotate
+
+**cron**으로 agent-admin이 1분마다 monitor.sh를 자동 실행하고, **logrotate**로 monitor.log가 10MB를 넘으면 잘라서 10개까지만 보관합니다. ([cron 줄 읽는 법, logrotate 설정 해설](docs/concepts.md#8-cron과-logrotate))
 
 ![cron과 logrotate](docs/images/cron_logrotate.svg)
 
-#### 8-1. cron 등록 (agent-admin의 crontab)
-
 ```bash
-sudo -iu agent-admin
-crontab -e        # 처음이면 편집기 선택 → 1 (nano)
+# [agent-admin] 본인 crontab에 등록 (앱은 탭 1에서 켜 둔 상태)
+echo "* * * * * /home/agent-admin/agent-app/bin/monitor.sh > /dev/null 2>&1" | crontab -
+
+# [arang] logrotate 설정 설치 → 판단만 해 보기
+sudo cp config/logrotate-agent-app /etc/logrotate.d/agent-app
+sudo logrotate -d /etc/logrotate.d/agent-app
 ```
 
-맨 아래에 한 줄 추가:
+**📸 8-1** agent-admin의 crontab에 1분마다(`* * * * *`) 등록
 
-```text
-* * * * * /home/agent-admin/agent-app/bin/monitor.sh > /dev/null 2>&1
-```
+![증거 8-1](docs/images/evidence/8-1_crontab.png)
 
-| 부분 | 뜻 |
-|---|---|
-| `* * * * *` | 분 · 시 · 일 · 월 · 요일 이 모두 "매번" → **1분마다** |
-| 전체 경로 | cron은 내 셸과 환경이 달라서 `~`나 환경변수 대신 전체 경로를 씀 |
-| `> /dev/null 2>&1` | 화면 출력은 사람이 볼 때만 필요. 기록은 스크립트가 monitor.log에 직접 남김 |
+**📸 8-2** 16:48 ~ 16:57 매분 `:02`초에 한 줄씩 자동으로 누적 (지정 포맷, `>>` 이어쓰기)
 
-**확인: 1분 뒤 줄 수가 늘어나면 성공**
+![증거 8-2](docs/images/evidence/8-2_monitor_log.png)
 
-```console
-$ crontab -l
-* * * * * /home/agent-admin/agent-app/bin/monitor.sh > /dev/null 2>&1
+**📸 8-3** 설치된 logrotate 설정: `size 10M`, `rotate 10`
 
-$ date +%T; wc -l < /var/log/agent-app/monitor.log
-23:03:43
-18
-$ # 1분 기다린 뒤
-$ date +%T; wc -l < /var/log/agent-app/monitor.log
-23:04:44
-19
+![증거 8-3](docs/images/evidence/8-3_logrotate_conf.png)
 
-$ tail -2 /var/log/agent-app/monitor.log
-[2026-10-26 23:04:02] PID:1070 CPU:13.4% MEM:8.2% DISK_USED:32%
-[2026-10-26 23:05:03] PID:1070 CPU:15.6% MEM:7.5% DISK_USED:32%
-```
+**📸 8-4** `10485760 bytes (10 rotations)`로 읽음, `log does not need rotating` (아직 10MB 미만)
 
-**📸 내 VM 실제 화면 (증거 8-1)**: agent-admin의 crontab에 1분마다(`* * * * *`) monitor.sh 실행 등록
-
-![증거 8-1: agent-admin crontab](docs/images/evidence/8-1_crontab.png)
-
-**📸 내 VM 실제 화면 (증거 7, 8-2)**: 16:48 ~ 16:57 매분 `:02`초에 한 줄씩 자동으로 쌓임 (cron 자동 실행 + `>>` 누적 + 지정 포맷)
-
-![증거 7, 8-2: monitor.log 1분마다 누적](docs/images/evidence/8-2_monitor_log.png)
-
-시각이 매분 `:02`초 근처로 찍히는 것이 cron이 실행했다는 표시입니다. (cron이 매분 0초에 깨우고, CPU 측정에 1초 쉬기 때문)
-안 늘어나면 `systemctl status cron` 으로 cron이 켜져 있는지 봅니다.
-
-#### 8-2. logrotate로 10MB / 10개 관리
-
-**개념**: monitor.log는 1분마다 한 줄씩 영원히 커집니다. logrotate는 **10MB를 넘으면 `monitor.log` → `monitor.log.1`로 이름을 바꾸고 새 파일을 만들며, 예전 파일은 10개까지만** 남깁니다.
-
-```bash
-sudo cp config/logrotate-agent-app /etc/logrotate.d/agent-app     # 저장소 폴더에서
-```
-
-```text
-/var/log/agent-app/monitor.log {
-    size 10M                              # 10MB를 넘으면 돌린다
-    rotate 10                             # 예전 파일 .1 ~ .10 까지만 남기고 더 오래된 건 삭제
-    missingok                             # 파일이 없어도 에러 내지 않음
-    notifempty                            # 빈 파일은 돌리지 않음
-    create 0660 agent-admin agent-core    # 새 monitor.log의 소유자 · 권한 (core 정책 유지)
-    su agent-admin agent-core             # 이 사용자 권한으로 작업 (로그 폴더가 root 소유가 아니라서 필요)
-}
-```
-
-**📸 내 VM 실제 화면 (증거 8-3)**: 설치된 `/etc/logrotate.d/agent-app`, `size 10M` · `rotate 10`
-
-![증거 8-3: logrotate 설정](docs/images/evidence/8-3_logrotate_conf.png)
-
-**📸 내 VM 실제 화면 (증거 8-4)**: `sudo logrotate -d` 판단 결과. `10485760 bytes (10 rotations)` = 10MB · 10개로 읽음, agent-admin(1001) · agent-core(1005) 권한으로 작업, `log does not need rotating` (아직 10MB 미만)
-
-![증거 8-4: logrotate 판단 결과](docs/images/evidence/8-4_logrotate_dryrun.png)
-
-**확인**
-
-```console
-$ sudo logrotate -d /etc/logrotate.d/agent-app       # -d: 실제로 하지 않고 판단만 출력
-considering log /var/log/agent-app/monitor.log
-  log does not need rotating (log size is below the 'size' threshold)
-
-$ sudo logrotate -f /etc/logrotate.d/agent-app       # -f: 크기와 상관없이 지금 한 번 돌려 보기
-$ ls -l /var/log/agent-app
--rw-rw----+ 1 agent-admin agent-core   0 Oct 19 01:39 monitor.log      ← 새 파일
--rw-rw----+ 1 agent-admin agent-core 189 Oct 19 01:39 monitor.log.1    ← 방금까지 쓰던 파일
-
-$ # 1분 뒤: cron이 새 monitor.log에 이어서 기록
-$ cat /var/log/agent-app/monitor.log
-[2026-10-19 01:40:02] PID:1550 CPU:1.0% MEM:5.9% DISK_USED:31%
-```
-
-테스트 환경에서 11MB짜리 로그를 만들고 12번 돌려 본 결과, **monitor.log + monitor.log.1 ~ .10 (11개)** 까지만 남고 그보다 오래된 것은 지워졌습니다.
-
-| 알아둘 점 | 내용 |
-|---|---|
-| 언제 검사하나 | logrotate는 하루 한 번 자동 실행 (`systemctl list-timers logrotate`) |
-| 하루 한 번이면 충분한가 | 한 줄 약 65바이트 × 1,440분 ≈ 하루 94KB → 10MB까지 약 100일. 하루 검사로 충분 |
-| 왜 스크립트가 아니라 logrotate | Ubuntu 기본 도구라 이미 매일 돌고 있고, 설정 6줄로 끝남 (직접 구현은 오버엔지니어링) |
+![증거 8-4](docs/images/evidence/8-4_logrotate_dryrun.png)
 
 ---
-
-## 증거 자료 체크리스트
-
-과제가 요구한 증거 8개입니다. 본인 VM(교육장 iMac + UTM, Ubuntu 22.04 x86_64)에서 **확인 명령**을 실행한 화면을 `docs/images/evidence/`에 모았습니다.
-
-| # | 요구 증거 | 확인 명령 | 이 문서에서 | 내 VM 화면 |
-|---|---|---|---|---|
-| 1 | SSH 포트 20022, root 원격 접속 차단 | `sudo sshd -T \| grep -E "^port \|^permitrootlogin "`, `sudo ss -tulnp \| grep sshd`, `ssh -p 20022 root@localhost` | [1단계](#1단계-ssh-잠그기-포트-20022-root-원격-접속-차단) | ✅ [1-1](docs/images/evidence/1-1_sshd_rules.png) · [1-2](docs/images/evidence/1-2_sshd_listen.png) · [1-3](docs/images/evidence/1-3_root_denied.png) |
-| 2 | UFW 활성화, 20022/tcp · 15034/tcp만 허용 | `sudo ufw status verbose` | [2단계](#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) | ✅ [2](docs/images/evidence/2_ufw_status.png) |
-| 3 | 계정 3개, 그룹 2개 | `id agent-admin`, `id agent-dev`, `id agent-test` | [3단계](#3단계-계정--그룹-만들기) | ✅ [3](docs/images/evidence/3_id_groups.png) |
-| 4 | 폴더 구조, 권한, ACL | `ls -ld ...`, `getfacl -p ...`, 계정별 접근 테스트 | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) | ✅ [4-1](docs/images/evidence/4-1_dirs.png) · [4-2](docs/images/evidence/4-2_test_denied.png) · [4-3](docs/images/evidence/4-3_dev_allowed.png) |
-| 5 | Boot 5단계 [OK] + Agent READY | 앱 실행 화면, `ss -ltn \| grep 15034` | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) | ✅ [6](docs/images/evidence/6_boot_ready.png) · [6-2](docs/images/evidence/6-2_app_listen.png) |
-| 6 | monitor.sh 실행 결과 (프로세스/포트/리소스/경고) | `monitor.sh; echo "exit=$?"` 정상 · 경고 · 실패 | [7단계](#7단계-monitorsh-만들기) | ✅ [7-1](docs/images/evidence/7-1_monitor_perm.png) · [7-2](docs/images/evidence/7-2_monitor_ok.png) · [7-3](docs/images/evidence/7-3_monitor_fw_warn.png) · [7-4](docs/images/evidence/7-4_monitor_fail.png) |
-| 7 | monitor.log 누적 (최근 라인) | `tail -5 /var/log/agent-app/monitor.log` | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ✅ [8-2](docs/images/evidence/8-2_monitor_log.png) |
-| 8 | crontab 매분 등록 + 1분 후 증가 | `crontab -l`, `wc -l` 전후 비교 | [8-1](#8-1-cron-등록-agent-admin의-crontab) | ✅ [8-1](docs/images/evidence/8-1_crontab.png) 등록 · [8-2](docs/images/evidence/8-2_monitor_log.png) 1분마다 증가 |
-
----
-
-## 과제 요구사항 대응
-
-| 과제 요구 | 어디에 |
-|---|---|
-| SSH 20022, PermitRootLogin no | [1단계](#1단계-ssh-잠그기-포트-20022-root-원격-접속-차단) `/etc/ssh/sshd_config` |
-| UFW 활성화, 20022/tcp · 15034/tcp만 | [2단계](#2단계-방화벽-켜기-20022tcp-15034tcp만-허용) |
-| agent-admin/dev/test, agent-common(3명)/core(admin, dev) | [3단계](#3단계-계정--그룹-만들기) |
-| upload_files = common R/W, api_keys · /var/log/agent-app = core ONLY R/W | [4단계](#4단계-폴더--권한-정하기-공유-폴더-vs-보안-폴더) |
-| 환경변수 5개, 키 파일 `agent_api_key_test` | [5단계](#5단계-환경변수--키-파일) (실제 앱 기준: `AGENT_KEY_PATH`=폴더, `secret.key`) |
-| 일반 계정으로 실행, Boot [OK] ×5, Agent READY, 0.0.0.0:15034 | [6단계](#6단계-앱-실행-boot-sequence-5단계-ok) |
-| monitor.sh 위치 · 소유 agent-dev · 그룹 agent-core · 750 | [7단계](#7단계-monitorsh-만들기) |
-| 프로세스/포트 실패 시 exit 1 | [monitor.sh](bin/monitor.sh) ①② |
-| 방화벽 비활성 → [WARNING], 종료 안 함 | [monitor.sh](bin/monitor.sh) ③, [config/sudoers-agent-monitor](config/sudoers-agent-monitor) |
-| CPU · MEM · DISK 수집, 20 / 10 / 80 초과 경고 | [monitor.sh](bin/monitor.sh) ④⑤ |
-| 로그 파일 · 포맷 | [monitor.sh](bin/monitor.sh) ⑥ |
-| 10MB / 10개 | [config/logrotate-agent-app](config/logrotate-agent-app), [8-2](#8-2-logrotate로-10mb--10개-관리) |
-| cron 매분 (agent-admin) | [8-1](#8-1-cron-등록-agent-admin의-crontab) |
-| 스크립트는 Bash로만, sudo는 필요할 때만 | monitor.sh는 순수 Bash. sudo는 root만 할 수 있는 `ufw status` 한 줄에만 사용 |
 
 ## 파일 구조
 
 ```text
 codyssey_B4-1/
 ├── README.md                    ← 수행 내역서 (이 문서)
-├── bin/
-│   └── monitor.sh               ← 자동화 스크립트 (제출 소스코드)
+├── bin/monitor.sh               ← 자동화 스크립트
 ├── config/
-│   ├── logrotate-agent-app      ← /etc/logrotate.d/agent-app 로 복사
-│   └── sudoers-agent-monitor    ← /etc/sudoers.d/agent-monitor 로 복사
+│   ├── logrotate-agent-app      ← /etc/logrotate.d/agent-app
+│   └── sudoers-agent-monitor    ← /etc/sudoers.d/agent-monitor
 └── docs/
-    ├── evaluation.md            ← 평가표 항목 1~4 정리
-    ├── commands.md              ← 내 VM에서 실제로 실행한 명령 기록
-    └── images/                  ← 설명 그림 (SVG, 직접 제작)
+    ├── commands.md              ← 설정 · 명령어 기록 (실행 순서 그대로)
+    ├── concepts.md              ← 개념과 배경
+    ├── evaluation.md            ← 평가표 항목 1~4
+    └── images/                  ← 설명 그림 (SVG) · evidence/ 증거 사진 20장
 ```
