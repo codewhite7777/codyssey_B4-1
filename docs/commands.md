@@ -288,4 +288,8 @@ ssh -p 20022 arang@192.168.64.2
 
 # [VM: arang] 📸 7, 8-2 monitor.log가 매분 자동으로 쌓이는지 (로그 폴더는 core 전용이라 sudo)
 sudo tail /var/log/agent-app/monitor.log
+
+# [Mac] (다시 끊겨서) 재접속 → [VM: arang] 📸 8-1 agent-admin의 crontab 확인
+ssh -p 20022 arang@192.168.64.2
+sudo crontab -u agent-admin -l
 ```
