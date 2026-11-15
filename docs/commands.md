@@ -292,4 +292,8 @@ sudo tail /var/log/agent-app/monitor.log
 # [Mac] (다시 끊겨서) 재접속 → [VM: arang] 📸 8-1 agent-admin의 crontab 확인
 ssh -p 20022 arang@192.168.64.2
 sudo crontab -u agent-admin -l
+
+# [VM: arang] logrotate 설정 설치 (10MB / 10개)
+cd ~/codyssey_B4-1
+sudo cp config/logrotate-agent-app /etc/logrotate.d/agent-app
 ```
