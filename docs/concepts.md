@@ -2,7 +2,7 @@
 
 README(수행 내역서)에 넣기에는 긴 **배경 설명과 개념**을 모은 문서입니다. 평가 질문에 답할 때 근거로 씁니다.
 
-[← README](../README.md) · [명령어 기록](commands.md) · [평가 정리](evaluation.md)
+[← README](../README.md) · [명령어 기록](commands.md) · [평가표 기준 정리](evaluation.md)
 
 | 순서 | 내용 |
 |---|---|
@@ -60,7 +60,7 @@ README(수행 내역서)에 넣기에는 긴 **배경 설명과 개념**을 모�
 | 15034 포트 열기 | `0.0.0.0:15034 LISTEN`. `curl`로 요청하면 응답 없이 시간 초과 → **열어 두기만 하고 응답은 안 함** | "포트가 열려 있나" 점검 대상 |
 | CPU · 메모리 부하 반복 | 아래 그림. 약 102초마다 한 바퀴 | CPU · MEM **경고가 실제로 뜨게** 만듦 |
 | 우선순위 낮추기 | `[SafetyGuard] Process priority lowered (nice=10)` | 부하를 줘도 sshd, cron을 방해하지 않게 |
-| 자기 로그 쓰기 | 화면과 `/var/log/agent-app/agent_app.log`에 1분에 약 3.3KB | 로그가 쌓이는 속도 문제 ([evaluation.md 4-3](evaluation.md#4-3-로그가-급증해-디스크가-가득-찰-위험-단기--중기-대응)) |
+| 자기 로그 쓰기 | 화면과 `/var/log/agent-app/agent_app.log`에 1분에 약 3.3KB | 로그가 쌓이는 속도 문제 ([evaluation.md 4-3](evaluation.md#4-3-로그가-급증해-디스크가-가득-찰-위험이-있다면-운영자가-취할-대응단기중기은)) |
 
 ![부하 한 주기](images/app_cycle.svg)
 

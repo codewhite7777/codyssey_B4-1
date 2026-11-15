@@ -13,8 +13,7 @@
 | **README** (이 문서) | 결과 요약 + 단계별 수행 내역과 증거 사진 |
 | [docs/commands.md](docs/commands.md) | 설정 · 명령어 기록: 내 VM에서 실행한 명령을 순서 그대로 |
 | [docs/concepts.md](docs/concepts.md) | 개념과 배경: 제공 앱, UTM을 고른 이유, 권한 · cron 등 자세한 설명 |
-| [docs/check.md](docs/check.md) | **평가 확인 가이드**: 평가표 질문마다 VM에서 실행할 명령 → 보여야 할 결과 → 답할 내용 |
-| [docs/evaluation.md](docs/evaluation.md) | 평가표 항목 1~4: 질문마다 보여줄 곳과 말하기 예시 |
+| [docs/evaluation.md](docs/evaluation.md) | **평가표 기준 정리**: 질문마다 설명 → VM에서 실행해서 보여주기 → 말하기 |
 | [bin/monitor.sh](bin/monitor.sh) | 자동화 스크립트 (Bash) |
 | [config/](config/) | logrotate 설정 (10MB / 10개), sudoers 설정 (`ufw status`만 허용) |
 
@@ -315,9 +314,8 @@ codyssey_B4-1/
 │   ├── logrotate-agent-app      ← /etc/logrotate.d/agent-app
 │   └── sudoers-agent-monitor    ← /etc/sudoers.d/agent-monitor
 └── docs/
-    ├── check.md                 ← 평가 확인 가이드 (하나씩 실행해서 확인)
     ├── commands.md              ← 설정 · 명령어 기록 (실행 순서 그대로)
     ├── concepts.md              ← 개념과 배경
-    ├── evaluation.md            ← 평가표 항목 1~4
+    ├── evaluation.md            ← 평가표 기준 정리 (설명 → 실행 → 말하기)
     └── images/                  ← 설명 그림 (SVG) · evidence/ 증거 사진 20장
 ```
