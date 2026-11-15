@@ -269,7 +269,7 @@ sudo ufw status
 ./agent-app-linux-x86
 ```
 
-## 8단계. cron + logrotate (진행 중)
+## 8단계. cron + logrotate
 
 ```bash
 # [VM: agent-admin] agent-admin 본인의 crontab에 1분마다 실행 등록 (sudo 없이) → 확인
@@ -299,4 +299,7 @@ sudo cp config/logrotate-agent-app /etc/logrotate.d/agent-app
 
 # [VM: arang] 📸 8-3 설치된 설정 내용 확인
 cat /etc/logrotate.d/agent-app
+
+# [VM: arang] 📸 8-4 logrotate 판단만 해 보기 (-d: 실제로는 안 자름) → 10MB · 10개, 아직 자를 필요 없음
+sudo logrotate -d /etc/logrotate.d/agent-app
 ```

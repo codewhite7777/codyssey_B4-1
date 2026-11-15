@@ -37,8 +37,9 @@
 | 8 | cron 1분마다 실행 + logrotate 10MB/10개 | `crontab -l`, [config/logrotate-agent-app](config/logrotate-agent-app) | ✅ |
 | - | 보너스 (report.sh, 시간 기반 보존) | - | ⛔ 하지 않음 |
 
-> **출력 예시에 대해**: 아래 `$` 명령 아래의 출력은 Ubuntu 테스트 환경에서 **제공 앱(`agent-app-linux-x86`)을 실제로 실행하며 얻은 결과**입니다. (UID 숫자, 시각, PID는 환경마다 다릅니다.)
-> 본인 VM에서 같은 명령을 실행해 화면을 캡처하면 그대로 증거 자료가 됩니다.
+> **출력 예시와 증거 사진에 대해**
+> - 단계별 `$` 명령 아래의 출력 예시는 테스트 환경에서 제공 앱을 실제로 실행하며 얻은 결과입니다. (UID, 시각, PID는 환경마다 다릅니다.)
+> - **📸 표시가 붙은 사진은 내 VM(교육장 iMac + UTM, Ubuntu Server 22.04 x86_64)에서 직접 찍은 화면**입니다. 모아 보기: [증거 자료 체크리스트](#증거-자료-체크리스트), 실행한 명령 순서: [docs/commands.md](docs/commands.md)
 
 ---
 
@@ -869,6 +870,10 @@ sudo cp config/logrotate-agent-app /etc/logrotate.d/agent-app     # 저장소 �
 **📸 내 VM 실제 화면 (증거 8-3)**: 설치된 `/etc/logrotate.d/agent-app`, `size 10M` · `rotate 10`
 
 ![증거 8-3: logrotate 설정](docs/images/evidence/8-3_logrotate_conf.png)
+
+**📸 내 VM 실제 화면 (증거 8-4)**: `sudo logrotate -d` 판단 결과. `10485760 bytes (10 rotations)` = 10MB · 10개로 읽음, agent-admin(1001) · agent-core(1005) 권한으로 작업, `log does not need rotating` (아직 10MB 미만)
+
+![증거 8-4: logrotate 판단 결과](docs/images/evidence/8-4_logrotate_dryrun.png)
 
 **확인**
 
