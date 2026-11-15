@@ -10,10 +10,14 @@
 |---|---|---|
 | 1 | [결과 요약](#1-결과-요약) | 다 됐는지 1분 안에 확인 |
 | 2 | [핵심 개념](#2-핵심-개념) | 용어가 낯설 때 |
-| 3 | [단계별 수행](#3-단계별-수행) | 무엇을 어떤 순서로 했는지 (명령 + 📸 증거) |
+| 3 | [단계별 수행](#3-단계별-수행) | 무엇을 어떤 순서로 했는지 (명령 + 설명) |
 | 4 | [부록](#4-부록) | 제공 앱 분석, UTM을 고른 이유, 파일 구성 |
 
-> 이 문서는 **수행 내역서**입니다(무엇을 했고 결과가 어땠나). 평가받을 때 칠 명령과 답변은 **[evaluation.md](evaluation.md)**에 따로 있습니다.
+| 문서 | 내용 |
+|---|---|
+| **README.md** (이 문서) | 무엇을 왜 어떻게 설정했나: 개념, 단계별 명령과 설명 |
+| **[수행내역서.md](수행내역서.md)** | 실행한 명령 + 확인한 것 + 📸 증거 사진 20장 |
+| **[evaluation.md](evaluation.md)** | 평가 때 칠 명령과 답변 (평가표 질문 원문 순서) |
 
 ---
 
@@ -62,7 +66,7 @@
 
 - 명령마다 **위에 주석으로 무엇을 바꾸는지** 적었습니다.
 - `✔ 확인` 주석은 **설정이 실제로 적용됐는지 본 명령**이고, `결과:`는 그때 화면에 나온 핵심 내용입니다.
-- 사진은 각 단계 끝의 "📸 증거"를 펼치면 보입니다.
+- 증거 사진은 설명과 함께 **[수행내역서.md](수행내역서.md)** 한곳에 모았습니다. 각 단계 끝의 "📸 증거" 링크를 누르면 바로 갑니다.
 
 | 표시 | 어디서 실행 |
 |---|---|
@@ -142,13 +146,7 @@ ssh -p 20022 root@192.168.64.2
 - **확인을 3번 하는 이유:** `grep`은 "파일에 적은 값", `sshd -T`는 "sshd가 실제로 쓰는 값"(다른 설정 파일에 덮이지 않았나), `ss`는 "정말 그 문에서 기다리나"입니다.
 - Ubuntu 22.04는 `systemctl restart ssh`로 포트 변경이 적용됩니다.
 
-<details><summary>📸 증거 1-1 · 1-2 · 1-3</summary>
-
-![1-1](images/evidence/1-1_sshd_rules.png)
-![1-2](images/evidence/1-2_sshd_listen.png)
-![1-3](images/evidence/1-3_root_denied.png)
-
-</details>
+📸 증거: [1-1](수행내역서.md#1-1-ssh-설정-적용값) · [1-2](수행내역서.md#1-2-sshd가-20022번에서-대기) · [1-3](수행내역서.md#1-3-root-원격-접속-거절)
 
 ### 2단계. 방화벽 켜기
 
@@ -176,11 +174,7 @@ sudo ufw enable
 sudo ufw status verbose
 ```
 
-<details><summary>📸 증거 2</summary>
-
-![2](images/evidence/2_ufw_status.png)
-
-</details>
+📸 증거: [2](수행내역서.md#2-ufw-상태)
 
 ### 3단계. 계정 · 그룹
 
@@ -214,11 +208,7 @@ id agent-admin; id agent-dev; id agent-test
 - 계정을 만들면 같은 이름의 **개인 그룹**이 자동으로 생깁니다(`id` 맨 앞). 과제에서 쓰는 그룹은 common, core 2개입니다.
 - `-aG`의 `-a`를 빼면 기존 그룹이 다 빠집니다.
 
-<details><summary>📸 증거 3</summary>
-
-![3](images/evidence/3_id_groups.png)
-
-</details>
+📸 증거: [3](수행내역서.md#3-계정별-그룹)
 
 ### 4단계. 폴더 · 권한
 
@@ -281,13 +271,7 @@ sudo -u agent-dev ls -la $H/api_keys
 - 기본 ACL(`setfacl -d`): 새 파일은 보통 그룹이 읽기만 가능하게 생깁니다. 기본 ACL이 있어야 "R/W 가능"이 새 파일에도 적용됩니다.
 - arang은 common도 core도 아니라서 `getfacl`이 막힙니다. 바깥 사람이 막힌다는 뜻이라 정상이며, `sudo getfacl`로 확인합니다.
 
-<details><summary>📸 증거 4-1 · 4-2 · 4-3</summary>
-
-![4-1](images/evidence/4-1_dirs.png)
-![4-2](images/evidence/4-2_test_denied.png)
-![4-3](images/evidence/4-3_dev_allowed.png)
-
-</details>
+📸 증거: [4-1](수행내역서.md#4-1-폴더-5개의-주인그룹권한) · [4-2](수행내역서.md#4-2-test는-비밀-폴더-거절) · [4-3](수행내역서.md#4-3-dev는-비밀-폴더-통과)
 
 ### 5단계. 환경변수 · 키 파일
 
@@ -335,12 +319,7 @@ ls -l $AGENT_KEY_PATH
 
 - **cron에서는 환경변수가 비어 있습니다.** Ubuntu의 `~/.bashrc`는 사람이 직접 쓰는 셸이 아니면 읽지 않습니다. 그래서 monitor.sh는 `${AGENT_PORT:-15034}`처럼 기본값을 둡니다.
 
-<details><summary>📸 증거 5-1 · 5-2</summary>
-
-![5-1](images/evidence/5-1_env.png)
-![5-2](images/evidence/5-2_keys.png)
-
-</details>
+📸 증거: [5-1](수행내역서.md#5-1-환경변수-5개) · [5-2](수행내역서.md#5-2-키-파일-권한)
 
 ### 6단계. 앱 실행
 
@@ -369,12 +348,7 @@ sudo ss -ltnp | grep 15034
 
 - **SSH가 끊기면** 그 창에서 돌던 앱도 같이 꺼집니다. 다시 접속해 `pgrep -a -f "^[^ ]*agent-app-linux"`로 확인하고, 비어 있으면 다시 실행합니다.
 
-<details><summary>📸 증거 6 · 6-2</summary>
-
-![6](images/evidence/6_boot_ready.png)
-![6-2](images/evidence/6-2_app_listen.png)
-
-</details>
+📸 증거: [6](수행내역서.md#6-boot-5단계와-agent-ready) · [6-2](수행내역서.md#6-2-앱이-15034에서-대기)
 
 ### 7단계. monitor.sh
 
@@ -448,14 +422,7 @@ echo "exit=$?"
 - **권한 정책:** 주인 dev는 `rwx`(수정 · 실행), core 그룹인 admin은 `r-x`(실행만 → cron이 돌릴 수 있지만 못 고침), test는 `---`.
 - **방화벽 확인에만 sudo를 쓴 이유:** `ufw status`는 root만 되고 agent-admin은 sudo가 없습니다. 그래서 [config/sudoers-agent-monitor](config/sudoers-agent-monitor)에 `ufw status` **한 줄만** 허용했습니다(`ufw status verbose`, `ufw disable`은 거절됨). `/etc/ufw/ufw.conf`의 `ENABLED=yes`는 "켜기로 설정됨"일 뿐이라 실제로 꺼졌는데 `[OK]`가 나올 수 있어 쓰지 않았습니다.
 
-<details><summary>📸 증거 7-1 · 7-2 · 7-3 · 7-4</summary>
-
-![7-1](images/evidence/7-1_monitor_perm.png)
-![7-2](images/evidence/7-2_monitor_ok.png)
-![7-3](images/evidence/7-3_monitor_fw_warn.png)
-![7-4](images/evidence/7-4_monitor_fail.png)
-
-</details>
+📸 증거: [7-1](수행내역서.md#7-1-monitorsh-설치-권한) · [7-2](수행내역서.md#7-2-정상일-때) · [7-3](수행내역서.md#7-3-방화벽을-껐을-때) · [7-4](수행내역서.md#7-4-앱이-죽었을-때)
 
 ### 8단계. cron · logrotate
 
@@ -506,14 +473,7 @@ sudo logrotate -d /etc/logrotate.d/agent-app
 - 앱이 꺼져 있으면 `[FAIL]`로 바로 끝나서 로그가 쌓이지 않습니다.
 - **logrotate를 쓴 이유:** 하루 한 번 자동으로 도는 Ubuntu 기본 도구라 스크립트를 짤 필요가 없습니다. 한 줄 약 65바이트 × 1,440분 ≈ 하루 94KB라서 하루 한 번 검사로 충분합니다.
 
-<details><summary>📸 증거 8-1 · 8-2 · 8-3 · 8-4</summary>
-
-![8-1](images/evidence/8-1_crontab.png)
-![8-2](images/evidence/8-2_monitor_log.png)
-![8-3](images/evidence/8-3_logrotate_conf.png)
-![8-4](images/evidence/8-4_logrotate_dryrun.png)
-
-</details>
+📸 증거: [8-1](수행내역서.md#8-1-crontab-등록) · [8-2](수행내역서.md#8-2-monitorlog-자동-누적) · [8-3](수행내역서.md#8-3-logrotate-설정) · [8-4](수행내역서.md#8-4-logrotate-판단-결과)
 
 ---
 
@@ -580,4 +540,6 @@ sudo logrotate -d /etc/logrotate.d/agent-app
 | [bin/monitor.sh](bin/monitor.sh) | 자동 점검 스크립트 (설정 17~26줄, 프로세스 · 포트 45~59줄, 방화벽 61~71줄, 자원 76~97줄, 기록 105~108줄) |
 | [config/logrotate-agent-app](config/logrotate-agent-app) | `/etc/logrotate.d/agent-app`에 복사 (10MB / 10개) |
 | [config/sudoers-agent-monitor](config/sudoers-agent-monitor) | `/etc/sudoers.d/agent-monitor`에 복사 (`ufw status`만 허용) |
+| [수행내역서.md](수행내역서.md) | 증거 사진 20장과 확인 내용 |
+| [evaluation.md](evaluation.md) | 평가 가이드 |
 | [images/](images/) | 설명 그림, [images/evidence/](images/evidence/)는 내 VM 증거 사진 20장 |
