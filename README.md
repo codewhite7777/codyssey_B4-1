@@ -866,6 +866,10 @@ sudo cp config/logrotate-agent-app /etc/logrotate.d/agent-app     # 저장소 �
 }
 ```
 
+**📸 내 VM 실제 화면 (증거 8-3)**: 설치된 `/etc/logrotate.d/agent-app`, `size 10M` · `rotate 10`
+
+![증거 8-3: logrotate 설정](docs/images/evidence/8-3_logrotate_conf.png)
+
 **확인**
 
 ```console

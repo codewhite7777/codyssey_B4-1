@@ -296,4 +296,7 @@ sudo crontab -u agent-admin -l
 # [VM: arang] logrotate 설정 설치 (10MB / 10개)
 cd ~/codyssey_B4-1
 sudo cp config/logrotate-agent-app /etc/logrotate.d/agent-app
+
+# [VM: arang] 📸 8-3 설치된 설정 내용 확인
+cat /etc/logrotate.d/agent-app
 ```
