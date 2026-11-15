@@ -2,7 +2,7 @@
 
 평가 질문마다 **보여줄 곳**과 **말하기 예시**를 정리했습니다. 말하기는 외우지 말고 흐름만 잡아 본인 말로 합니다.
 
-[← README](../README.md) · [개념과 배경](concepts.md) · [monitor.sh](../bin/monitor.sh) · [logrotate 설정](../config/logrotate-agent-app)
+[← README](../README.md) · [평가 확인 가이드 (실행 명령)](check.md) · [개념과 배경](concepts.md) · [monitor.sh](../bin/monitor.sh) · [logrotate 설정](../config/logrotate-agent-app)
 
 ---
 
