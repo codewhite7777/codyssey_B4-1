@@ -74,15 +74,25 @@
 | 표시 없음 | VM, 내 계정 `arang` (sudo 가능) |
 | `[admin]` | VM, `sudo -iu agent-admin`으로 바꾼 창 (sudo 없음) |
 
+> ⚠️ **명령은 한 줄(한 명령)씩 붙여넣으세요.** 여러 줄을 한꺼번에 붙여넣으면 `sudo`가 비밀번호를 물을 때 다음 줄이 비밀번호로 들어가거나, `sudo -iu agent-admin` 뒤의 줄이 엉뚱한 계정에서 실행됩니다. (`\`로 끝나는 줄은 다음 줄과 합쳐서 한 명령입니다.)
+
 ### 0단계. 준비
 
 UTM으로 Ubuntu VM을 만들고([만드는 순서](#b-실습-환경-왜-utm-vm인가)), 복사 · 붙여넣기가 되는 Mac 터미널에서 접속해 작업합니다.
+
+> **VM을 새로 만들었다면 먼저 확인할 것 2가지**
+> 1. **주소:** VM 화면에서 로그인 후 `ip -4 addr show`로 `192.168.64.x` 주소를 확인합니다. 예전 VM이 `.2`를 쓰고 있었다면 새 VM은 `.3`일 수 있습니다. 아래 명령의 `192.168.64.2`를 그 주소로 바꿔 씁니다.
+> 2. **접속 경고:** 같은 주소로 예전 VM에 접속한 적이 있으면 `REMOTE HOST IDENTIFICATION HAS CHANGED!`가 뜨며 접속이 막힙니다. VM을 새로 만들어 열쇠가 바뀐 것이라 정상입니다. Mac에서 예전 기록을 지우고 다시 접속합니다.
+>    ```bash
+>    ssh-keygen -R 192.168.64.2
+>    ssh-keygen -R "[192.168.64.2]:20022"
+>    ```
 
 ```bash
 # [Mac] VM에 접속 (아직 기본 22번 포트)
 ssh arang@192.168.64.2
 
-# [Mac] 제공 앱 파일을 VM의 내 홈 폴더로 복사
+# [Mac] 제공 앱 파일을 VM의 내 홈 폴더로 복사 (앱 파일이 있는 경로로)
 scp ~/Downloads/agent-app/agent-app-linux-x86 arang@192.168.64.2:~/
 
 # 시간대를 한국 시간으로 (로그 시각이 맞도록)
@@ -263,7 +273,8 @@ sudo -u agent-test touch $H/upload_files/from-test.txt
 # ✔ 확인: test는 비밀 폴더 거절 (📸 4-2) → 결과: Permission denied
 sudo -u agent-test ls $H/api_keys
 
-# ✔ 확인: dev는 비밀 폴더 통과 (📸 4-3) → 결과: secret.key 등 목록
+# ✔ 확인: dev는 비밀 폴더 통과 (📸 4-3)
+#   결과: 목록이 보임 (키 파일은 5단계에서 만들어서 아직 . 과 .. 만)
 sudo -u agent-dev ls -la $H/api_keys
 ```
 
@@ -431,16 +442,23 @@ echo "exit=$?"
 ![cron과 logrotate](images/cron_logrotate.svg)
 
 ```bash
+# 탭 1은 앱이 쓰고 있으므로 탭 2에서 agent-admin으로 잠깐 바꿈
+sudo -iu agent-admin
+
 # [admin] agent-admin 본인의 crontab에 "1분마다 monitor.sh" 등록
 #   > /dev/null 2>&1 = 화면 출력은 버림 (기록은 monitor.sh가 직접 함)
 echo "* * * * * /home/agent-admin/agent-app/bin/monitor.sh > /dev/null 2>&1" \
     | crontab -
 
+# [admin] arang으로 돌아가기 (저장소 폴더로 돌아옴)
+exit
+
 # ✔ 확인: crontab 확인 (📸 8-1)
 #   결과: * * * * * /home/agent-admin/agent-app/bin/monitor.sh ...
 sudo crontab -u agent-admin -l
 
-# ✔ 확인: 로그가 매분 저절로 쌓이나 (📸 8-2)
+# ✔ 확인: 로그가 매분 저절로 쌓이나 (📸 8-2) → 등록 후 2~3분 기다린 뒤
+#   (앱이 켜져 있어야 쌓임)
 #   결과: [시각] PID:.. CPU:..% MEM:..% DISK_USED:..% 줄이 1분 간격
 sudo tail /var/log/agent-app/monitor.log
 
@@ -530,7 +548,7 @@ sudo logrotate -d /etc/logrotate.d/agent-app
 | 1 | UTM 설치 (mac.getutm.app에서 dmg → `~/Applications`. 인텔 Mac은 Homebrew 지원이 끝나 직접 받음) |
 | 2 | Ubuntu Server 22.04 iso: 인텔 Mac은 `amd64`, M칩은 `arm64` |
 | 3 | UTM → `+` → 가상화(Virtualize) → Linux → iso 선택, 메모리 4GB |
-| 4 | 설치: Profile에서 만드는 계정이 내 계정(sudo 가능), **Install OpenSSH server 체크** |
+| 4 | 설치: Profile에서 만드는 계정이 내 계정(sudo 가능). README와 같게 쓰려면 **계정 이름 `arang`, 서버 이름 `b4-1`**. **Install OpenSSH server 체크** |
 | 5 | 설치 후 CD/DVD 꺼내기 → 재부팅 → `ip -4 addr show`로 주소 확인 |
 
 ### C. 파일 구성

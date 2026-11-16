@@ -196,7 +196,9 @@ sed -n '76,97p' bin/monitor.sh
 sudo ls -l /home/agent-admin/agent-app/bin/monitor.sh
 
 # [탭 2] 키워드: Permission denied (test는 실행 불가)
-sudo -u agent-test /home/agent-admin/agent-app/bin/monitor.sh
+#   bash -c로 감싸야 메시지가 Permission denied로 나옴
+#   (sudo로 바로 실행하면 sudo가 "command not found"라고 표시함)
+sudo -u agent-test bash -c /home/agent-admin/agent-app/bin/monitor.sh
 ```
 
 > 💬 "주인 dev는 수정 · 실행(rwx), core 그룹인 admin은 실행만(r-x)이라 cron이 돌릴 수 있지만 고칠 수는 없고, test는 아무것도 못 합니다(---). root 권한도 `ufw status` 한 명령만 sudoers로 허용했습니다."
