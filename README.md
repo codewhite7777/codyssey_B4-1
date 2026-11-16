@@ -89,12 +89,15 @@ UTM으로 Ubuntu VM을 만들고([만드는 순서](#b-실습-환경-왜-utm-vm�
 >    ```
 
 ```bash
-# [Mac] VM에 접속 (새 VM은 아직 기본 22번 포트)
-#   1단계를 끝낸 VM은 22번이 닫혀 있으므로: ssh -p 20022 arang@192.168.64.2
-ssh arang@192.168.64.2
+# [Mac] VM에 접속 (1단계를 끝낸 VM이라 20022번 포트)
+ssh -p 20022 arang@192.168.64.2
+# 새 VM이라면 아직 기본 22번 포트:
+# ssh arang@192.168.64.2
 
-# [Mac] 제공 앱 파일을 VM의 내 홈 폴더로 복사 (앱 파일이 있는 경로로)
-scp ~/Downloads/agent-app/agent-app-linux-x86 arang@192.168.64.2:~/
+# [Mac] 제공 앱 파일을 VM의 내 홈 폴더로 복사 (scp는 포트 옵션이 대문자 -P)
+scp -P 20022 ~/Downloads/agent-app/agent-app-linux-x86 arang@192.168.64.2:~/
+# 새 VM이라면:
+# scp ~/Downloads/agent-app/agent-app-linux-x86 arang@192.168.64.2:~/
 
 # 시간대를 한국 시간으로 (로그 시각이 맞도록)
 sudo timedatectl set-timezone Asia/Seoul
