@@ -269,67 +269,113 @@ id agent-admin; id agent-dev; id agent-test
 
 ### 4단계. 폴더 · 권한
 
-`upload_files`는 3명이 함께 쓰는 **공용** 폴더, `api_keys`와 로그 폴더는 admin · dev만 쓰는 **보안** 폴더입니다.
+**한 줄 요약:** 폴더마다 "누가 들어올 수 있는지"를 정합니다. 3명이 함께 쓰는 방 하나, admin · dev만 들어가는 방 두 개를 만듭니다.
+
+#### 비유로 보기
+
+agent-admin의 홈 폴더를 **건물**, 그 안의 폴더들을 **방**이라고 생각하면 쉽습니다.
+
+| 폴더 | 비유 | 들어갈 수 있는 사람 | 왜 |
+|---|---|---|---|
+| `/home/agent-admin` | 건물 입구 | 3명 모두 **지나가기만** | 안쪽 방에 가려면 입구는 지나가야 함 |
+| `agent-app` | 사무실 | 3명 모두 (보기만) | 앱 파일이 있는 곳 |
+| `upload_files` | **공용 회의실** | 3명 모두 읽기 · 쓰기 | 함께 쓰는 공간 |
+| `api_keys` | **금고** | admin · dev만 | 비밀 키가 들어 있음 |
+| `bin` | 개발자 작업실 | dev가 주인, admin은 실행만 | monitor.sh를 dev가 만들고 admin이 돌림 |
+| `/var/log/agent-app` | **기록 보관실** | admin · dev만 | 로그가 지워지면 사고 원인을 못 찾음 |
 
 ![폴더 구조](images/dir_tree.svg)
 
 ![누가 어디에 접근하나](images/permissions.svg)
 
-| 폴더 | 주인:그룹 | 권한 | 의미 |
-|---|---|---|---|
-| `agent-app` ($AGENT_HOME) | agent-admin:agent-common | `750` | 3명 모두 들어올 수 있음, 바깥은 막힘 |
-| `upload_files` | agent-admin:agent-common | `2770` + 기본 ACL | 3명 모두 읽기 · 쓰기 |
-| `api_keys` | agent-admin:agent-core | `2770` | admin · dev만 |
-| `bin` | agent-dev:agent-core | `750` | monitor.sh 작성자 dev가 주인, admin은 실행만 |
-| `/var/log/agent-app` | agent-admin:agent-core | `2770` + 기본 ACL | admin · dev만 |
+#### 권한 숫자 읽는 법 (3가지만 알면 됨)
+
+1. **칸은 3개:** `주인` / `그룹` / `나머지` 순서로 숫자 3개를 씁니다.
+2. **숫자는 더하기:** 읽기 `4` + 쓰기 `2` + 들어가기 `1`
+   - `7` = 다 됨, `5` = 보기 · 들어가기만, `0` = 못 들어감
+3. **읽어 보기**
+
+| 숫자 | 주인 | 그룹 | 나머지 | 쓰는 곳 |
+|---|---|---|---|---|
+| `750` | 7 다 됨 | 5 보기만 | 0 못 들어감 | `agent-app`, `bin` |
+| `770` | 7 다 됨 | 7 다 됨 | 0 못 들어감 | `upload_files`, `api_keys`, 로그 폴더 |
+| `2770` | | | | 위 `770` + 앞자리 `2`(아래 setgid) |
+
+#### 특별 장치 3개
+
+| 장치 | 쉬운 말 | 없으면 생기는 일 |
+|---|---|---|
+| **입구 통과권** (`setfacl -m g:agent-common:x`) | 건물 입구를 **지나가기만** 허용. 입구에서 다른 방을 둘러보지는 못함 | Ubuntu 홈 폴더는 남이 못 들어가서 dev · test는 안쪽 방에 아예 못 감 |
+| **setgid** (`2770`의 앞자리 `2`) | 이 방에서 만든 파일에 **방 이름표(그룹)가 자동으로** 붙음 | 만든 사람 개인 이름표가 붙어서 같은 방 사람이 못 씀 |
+| **기본 ACL** (`setfacl -d`) | 앞으로 생길 파일도 **그룹이 쓸 수 있게** 하는 기본 규칙 | 새 파일이 그룹에게 "읽기만"으로 생길 수 있음 |
+
+`ls -l`에서 권한 끝에 `+`가 보이면 ACL이 걸린 폴더라는 뜻이고, `rws`의 `s`가 setgid입니다.
+
+#### 명령 (폴더별로)
+
+`chown 주인:그룹 폴더` = 주인과 그룹 정하기, `chmod 숫자 폴더` = 권한 숫자 정하기
 
 ```bash
-# [SSH] 긴 경로를 H로 줄여 씀
+# [SSH] 긴 경로를 H라는 짧은 이름으로 (이 창에서만 유효)
 H=/home/agent-admin/agent-app
 
-# [SSH] 폴더 4개 만들기 (처음엔 주인이 root)
+# [SSH] 방 4개 만들기 (처음엔 주인이 root라 아무도 못 씀)
 sudo mkdir -p $H/upload_files $H/api_keys $H/bin /var/log/agent-app
 
-# [SSH] 홈 폴더(750)는 남이 못 들어감 → common에게 "지나가기(x)"만 허용
+# [SSH] 건물 입구: common(3명)에게 "지나가기"만 허용
 sudo setfacl -m g:agent-common:x /home/agent-admin
 
-# [SSH] 주인:그룹 바꾸고(chown) 권한 숫자 정하기(chmod)
-#   750  = 주인 rwx, 그룹 r-x, 나머지 없음
-#   2770 = setgid + 주인 rwx, 그룹 rwx, 나머지 없음
+# [SSH] 사무실 agent-app: 주인 admin, 그룹 common, 750 (3명 보기만)
 sudo chown agent-admin:agent-common $H
 sudo chmod 750 $H
+
+# [SSH] 공용 회의실 upload_files: 그룹 common, 2770 (3명 읽기·쓰기)
 sudo chown agent-admin:agent-common $H/upload_files
 sudo chmod 2770 $H/upload_files
+#   앞으로 생길 파일도 common이 쓸 수 있게 (기본 ACL)
+sudo setfacl -d -m g:agent-common:rwx $H/upload_files
+
+# [SSH] 금고 api_keys: 그룹 core, 2770 (admin·dev만)
 sudo chown agent-admin:agent-core $H/api_keys
 sudo chmod 2770 $H/api_keys
+
+# [SSH] 작업실 bin: 주인 dev, 그룹 core, 750 (dev 수정, admin 실행만)
 sudo chown agent-dev:agent-core $H/bin
 sudo chmod 750 $H/bin
+
+# [SSH] 기록 보관실 로그 폴더: 그룹 core, 2770 (admin·dev만)
 sudo chown agent-admin:agent-core /var/log/agent-app
 sudo chmod 2770 /var/log/agent-app
-
-# [SSH] 기본 ACL: 앞으로 생길 파일도 그룹이 읽기·쓰기 가능하게
-sudo setfacl -d -m g:agent-common:rwx $H/upload_files
+#   앞으로 생길 로그 파일도 core가 쓸 수 있게 (기본 ACL)
 sudo setfacl -d -m g:agent-core:rw /var/log/agent-app
+```
 
-# [SSH] 폴더 5개 한눈에 (📸 4-1) → 결과: 위 표와 같은 주인·그룹·권한
+#### 확인 (진짜로 막히는지 직접 들어가 보기)
+
+`sudo -u 계정 명령` = 그 계정인 척하고 명령을 실행해 보기
+
+```bash
+# [SSH] 방 5개의 주인·그룹·권한 한눈에 (📸 4-1)
+#   결과: 위 "비유로 보기" 표와 같은 주인·그룹, + 와 s 표시
 sudo ls -ld $H $H/upload_files $H/api_keys $H/bin /var/log/agent-app
 
-# [SSH] 공용 폴더에 test가 쓰기 → 결과: 에러 없이 성공
+# [SSH] test가 공용 회의실에 파일 만들기 → 결과: 에러 없이 성공
 sudo -u agent-test touch $H/upload_files/from-test.txt
 
-# [SSH] ✔ 확인: test는 비밀 폴더 거절 (📸 4-2) → 결과: Permission denied
+# [SSH] ✔ 확인: test가 금고 열기 (📸 4-2) → 결과: Permission denied (거절)
 sudo -u agent-test ls $H/api_keys
 
-# [SSH] ✔ 확인: dev는 비밀 폴더 통과 (📸 4-3)
-#   결과: 목록이 보임 (키 파일은 5단계에서 만들어서 아직 . 과 .. 만)
+# [SSH] ✔ 확인: dev가 금고 열기 (📸 4-3) → 결과: 목록이 보임 (통과)
+#   키 파일은 5단계에서 만들어서 지금은 . 과 .. 만 보임
 sudo -u agent-dev ls -la $H/api_keys
 ```
 
-- `2770`: 앞 `2` = setgid(새 파일이 폴더 그룹을 물려받음), 끝 `0` = 그룹 밖은 아예 못 들어옴.
-- 기본 ACL(`setfacl -d`): 새 파일은 보통 그룹이 읽기만 가능하게 생깁니다. 기본 ACL이 있어야 "R/W 가능"이 새 파일에도 적용됩니다.
-- arang은 common도 core도 아니라서 `getfacl`이 막힙니다. 바깥 사람이 막힌다는 뜻이라 정상이며, `sudo getfacl`로 확인합니다.
+같은 금고인데 **test는 거절, dev는 통과**하는 것이 이 단계의 핵심 증거입니다.
+
+> 내 계정 arang은 common도 core도 아니라서 `getfacl`로 ACL을 보려 해도 막힙니다. 바깥 사람이 막힌다는 뜻이라 정상이고, 볼 때는 `sudo getfacl 폴더`로 봅니다.
 
 📸 증거: [4-1](수행내역서.md#4-1-폴더-5개의-주인그룹권한) · [4-2](수행내역서.md#4-2-test는-비밀-폴더-거절) · [4-3](수행내역서.md#4-3-dev는-비밀-폴더-통과)
+
 
 ### 5단계. 환경변수 · 키 파일
 
