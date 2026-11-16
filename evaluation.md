@@ -22,25 +22,34 @@
 
 | 창 | 프롬프트 |
 |---|---|
-| `[Mac]` Mac 터미널 | `codewhite77770105@cx2r6s7 ~ %` |
-| `[탭 1]` 앱 전용 창 | `agent-admin@b4-1:~/agent-app$` |
-| `[탭 2]` 확인용 창 | `arang@b4-1:~/codyssey_B4-1$` |
+| `[MAC]` Mac 터미널 | `codewhite77770105@cx2r6s7 ~ %` |
+| `[SSH 탭 1: agent-admin]` 앱 전용 창 | `agent-admin@b4-1:~/agent-app$` |
+| `[SSH 탭 2]` 확인용 창 (arang) | `arang@b4-1:~/codyssey_B4-1$` |
 
 ```bash
-# [Mac] UTM 열기 → b4-1이 멈춰 있으면 ▶, 1분 대기
+# [MAC] UTM 열기 → b4-1이 멈춰 있으면 ▶, 1분 대기
 open ~/Applications/UTM.app
 
-# [Mac] 탭 1: VM 접속 → agent-admin으로 바꾸고 앱 실행
+# [MAC] 탭 1: VM 접속
 ssh -p 20022 arang@192.168.64.2
+
+# [SSH 탭 1] agent-admin으로 바꾸기
 sudo -iu agent-admin
+
+# [SSH 탭 1: agent-admin] 앱 폴더로 이동
 cd $AGENT_HOME
-# 기대: Boot [OK]×5 → Agent READY (이 창은 그대로 둠)
+
+# [SSH 탭 1: agent-admin] 앱 실행 (이 창은 그대로 둠)
+#   키워드: Boot [OK]×5 → Agent READY
 ./agent-app-linux-x86
 
-# [Mac] ⌘T로 탭 2: VM 접속 → 저장소 폴더로
+# [MAC] ⌘T로 새 탭(탭 2)을 열고 VM 접속
 ssh -p 20022 arang@192.168.64.2
+
+# [SSH 탭 2] 저장소 폴더로 이동
 cd ~/codyssey_B4-1
-# 비밀번호를 미리 넣어 둠 (15분간 다시 안 물음)
+
+# [SSH 탭 2] 비밀번호를 미리 넣어 둠 (15분간 다시 안 물음)
 sudo -v
 ```
 
@@ -53,13 +62,13 @@ sudo -v
 → [1단계](README.md#1단계-ssh-잠그기)
 
 ```bash
-# [탭 2] 키워드: port 20022 / permitrootlogin no
+# [SSH 탭 2] 키워드: port 20022 / permitrootlogin no
 sudo sshd -T | grep -E "^port |^permitrootlogin "
 
-# [탭 2] 키워드: 0.0.0.0:20022 LISTEN sshd
+# [SSH 탭 2] 키워드: 0.0.0.0:20022 LISTEN sshd
 sudo ss -tlnp | grep sshd
 
-# [Mac] 키워드: Permission denied (Ctrl+C로 빠져나옴)
+# [MAC] 키워드: Permission denied (Ctrl+C로 빠져나옴)
 ssh -p 20022 root@192.168.64.2
 ```
 
@@ -70,7 +79,7 @@ ssh -p 20022 root@192.168.64.2
 → [2단계](README.md#2단계-방화벽-켜기)
 
 ```bash
-# [탭 2] 키워드: Status: active / deny (incoming) / 20022/tcp, 15034/tcp만
+# [SSH 탭 2] 키워드: Status: active / deny (incoming) / 20022/tcp, 15034/tcp만
 #   (v6) 줄은 IPv6용 복사본
 sudo ufw status verbose
 ```
@@ -82,7 +91,7 @@ sudo ufw status verbose
 → [3단계](README.md#3단계-계정--그룹)
 
 ```bash
-# [탭 2] 키워드: admin·dev = agent-common, agent-core / test = agent-common
+# [SSH 탭 2] 키워드: admin·dev = agent-common, agent-core / test = agent-common
 id agent-admin; id agent-dev; id agent-test
 ```
 
@@ -93,10 +102,10 @@ id agent-admin; id agent-dev; id agent-test
 → [6단계](README.md#6단계-앱-실행)
 
 ```bash
-# [탭 1] 화면을 위로 스크롤
+# [SSH 탭 1: agent-admin] 화면을 위로 스크롤
 #   키워드: [1/5]~[5/5] [OK] → All Boot Checks Passed! → Agent READY
 
-# [탭 2] 키워드: 0.0.0.0:15034 LISTEN agent-app-linux
+# [SSH 탭 2] 키워드: 0.0.0.0:15034 LISTEN agent-app-linux
 sudo ss -ltnp | grep 15034
 ```
 
@@ -107,15 +116,15 @@ sudo ss -ltnp | grep 15034
 → [7단계](README.md#7단계-monitorsh)
 
 ```bash
-# [탭 2] 정상일 때 → 키워드: [OK] 3개, exit=0
+# [SSH 탭 2] 정상일 때 → 키워드: [OK] 3개, exit=0
 sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh
 echo "exit=$?"
 
-# [탭 1] Ctrl+C로 앱을 끈 뒤 탭 1에서 → 키워드: [FAIL] not running, exit=1
+# [SSH 탭 1: agent-admin] Ctrl+C로 앱을 끈 뒤 → 키워드: [FAIL] not running, exit=1
 /home/agent-admin/agent-app/bin/monitor.sh
 echo "exit=$?"
 
-# [탭 1] 앱 다시 켜기
+# [SSH 탭 1: agent-admin] 앱 다시 켜기
 ./agent-app-linux-x86
 ```
 
@@ -126,7 +135,7 @@ echo "exit=$?"
 → [7단계](README.md#7단계-monitorsh) · [8단계](README.md#8단계-cron--logrotate)
 
 ```bash
-# [탭 2] 키워드: [YYYY-MM-DD HH:MM:SS] PID:.. CPU:..% MEM:..% DISK_USED:..%
+# [SSH 탭 2] 키워드: [YYYY-MM-DD HH:MM:SS] PID:.. CPU:..% MEM:..% DISK_USED:..%
 sudo tail -5 /var/log/agent-app/monitor.log
 ```
 
@@ -137,10 +146,10 @@ sudo tail -5 /var/log/agent-app/monitor.log
 → [8단계](README.md#8단계-cron--logrotate)
 
 ```bash
-# [탭 2] 키워드: * * * * * /home/agent-admin/agent-app/bin/monitor.sh
+# [SSH 탭 2] 키워드: * * * * * /home/agent-admin/agent-app/bin/monitor.sh
 sudo crontab -u agent-admin -l
 
-# [탭 2] 키워드: 1~2분 보면 새 줄이 저절로 추가됨 (Ctrl+C로 종료)
+# [SSH 탭 2] 키워드: 1~2분 보면 새 줄이 저절로 추가됨 (Ctrl+C로 종료)
 sudo tail -f /var/log/agent-app/monitor.log
 ```
 
@@ -151,10 +160,10 @@ sudo tail -f /var/log/agent-app/monitor.log
 → [8단계](README.md#8단계-cron--logrotate)
 
 ```bash
-# [탭 2] 키워드: size 10M / rotate 10
+# [SSH 탭 2] 키워드: size 10M / rotate 10
 cat /etc/logrotate.d/agent-app
 
-# [탭 2] 키워드: 10485760 bytes (10 rotations)
+# [SSH 탭 2] 키워드: 10485760 bytes (10 rotations)
 sudo logrotate -d /etc/logrotate.d/agent-app
 ```
 
@@ -167,10 +176,11 @@ sudo logrotate -d /etc/logrotate.d/agent-app
 → [7단계 표 ①②](README.md#7단계-monitorsh)
 
 ```bash
-# [탭 2] monitor.sh의 프로세스·포트 확인 코드
+# [SSH 탭 2] monitor.sh의 프로세스·포트 확인 코드
 sed -n '45,59p' bin/monitor.sh
 
-# [탭 2] 같은 패턴으로 직접 찾기 → 키워드: ./agent-app-linux-x86 2줄 (부모·자식)
+# [SSH 탭 2] 같은 패턴으로 직접 찾기
+#   키워드: ./agent-app-linux-x86 2줄 (부모·자식)
 pgrep -a -f "^[^ ]*agent-app-linux"
 ```
 
@@ -181,7 +191,7 @@ pgrep -a -f "^[^ ]*agent-app-linux"
 → [7단계 표 ④⑥](README.md#7단계-monitorsh)
 
 ```bash
-# [탭 2] monitor.sh의 자원 수집 코드 (/proc/stat, free, df -P)
+# [SSH 탭 2] monitor.sh의 자원 수집 코드 (/proc/stat, free, df -P)
 sed -n '76,97p' bin/monitor.sh
 ```
 
@@ -192,10 +202,10 @@ sed -n '76,97p' bin/monitor.sh
 → [7단계](README.md#7단계-monitorsh)
 
 ```bash
-# [탭 2] 키워드: -rwxr-x--- agent-dev agent-core
+# [SSH 탭 2] 키워드: -rwxr-x--- agent-dev agent-core
 sudo ls -l /home/agent-admin/agent-app/bin/monitor.sh
 
-# [탭 2] 키워드: Permission denied (test는 실행 불가)
+# [SSH 탭 2] 키워드: Permission denied (test는 실행 불가)
 #   bash -c로 감싸야 메시지가 Permission denied로 나옴
 #   (sudo로 바로 실행하면 sudo가 "command not found"라고 표시함)
 sudo -u agent-test bash -c /home/agent-admin/agent-app/bin/monitor.sh
@@ -216,7 +226,7 @@ sudo -u agent-test bash -c /home/agent-admin/agent-app/bin/monitor.sh
 → [1단계 그림](README.md#1단계-ssh-잠그기)
 
 ```bash
-# [Mac] 봇이 두드리는 옛 22번 → 키워드: Operation timed out (닫혀 있음)
+# [MAC] 봇이 두드리는 옛 22번 → 키워드: Operation timed out (닫혀 있음)
 ssh -o ConnectTimeout=5 -p 22 arang@192.168.64.2
 ```
 
@@ -227,10 +237,10 @@ ssh -o ConnectTimeout=5 -p 22 arang@192.168.64.2
 → [4단계](README.md#4단계-폴더--권한)
 
 ```bash
-# [탭 2] 키워드: Permission denied
+# [SSH 탭 2] 키워드: Permission denied
 sudo -u agent-test ls /home/agent-admin/agent-app/api_keys
 
-# [탭 2] 키워드: 목록이 보임 → 같은 폴더, 사람에 따라 다른 결과
+# [SSH 탭 2] 키워드: 목록이 보임 → 같은 폴더, 사람에 따라 다른 결과
 sudo -u agent-dev ls -la /home/agent-admin/agent-app/api_keys
 ```
 
@@ -243,14 +253,14 @@ sudo -u agent-dev ls -la /home/agent-admin/agent-app/api_keys
 ![경고와 종료](images/warn_vs_exit.svg)
 
 ```bash
-# [탭 2] 방화벽 잠깐 끄기
+# [SSH 탭 2] 방화벽 잠깐 끄기
 sudo ufw disable
 
-# [탭 2] 키워드: [WARNING] Firewall (ufw) is not active, 그래도 exit=0
+# [SSH 탭 2] 키워드: [WARNING] Firewall (ufw) is not active, 그래도 exit=0
 sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh
 echo "exit=$?"
 
-# [탭 2] 꼭 다시 켜기 (y)
+# [SSH 탭 2] 꼭 다시 켜기 (y)
 sudo ufw enable
 ```
 
@@ -261,13 +271,13 @@ sudo ufw enable
 ![리다이렉션](images/redirect.svg)
 
 ```bash
-# [탭 2] > 덮어쓰기 → 키워드: 2만 남음
+# [SSH 탭 2] > 덮어쓰기 → 키워드: 2만 남음
 echo 1 > /tmp/o; echo 2 > /tmp/o; cat /tmp/o
 
-# [탭 2] >> 이어쓰기 → 키워드: 1, 2 둘 다 남음
+# [SSH 탭 2] >> 이어쓰기 → 키워드: 1, 2 둘 다 남음
 echo 1 >> /tmp/a; echo 2 >> /tmp/a; cat /tmp/a
 
-# [탭 2] monitor.sh의 기록 줄 → 키워드: >> "$LOG_FILE"
+# [SSH 탭 2] monitor.sh의 기록 줄 → 키워드: >> "$LOG_FILE"
 sed -n '105,108p' bin/monitor.sh
 ```
 
@@ -280,7 +290,7 @@ sed -n '105,108p' bin/monitor.sh
 ![Nginx로 바뀐다면](images/nginx.svg)
 
 ```bash
-# [탭 2] 바꿀 값이 모인 곳 → 키워드: APP_NAME, APP_PORT, LOG_DIR, *_LIMIT
+# [SSH 탭 2] 바꿀 값이 모인 곳 → 키워드: APP_NAME, APP_PORT, LOG_DIR, *_LIMIT
 sed -n '17,26p' bin/monitor.sh
 ```
 
@@ -291,16 +301,16 @@ sed -n '17,26p' bin/monitor.sh
 ![프로세스 O 포트 X](images/port_down.svg)
 
 ```bash
-# ① 프로세스가 정말 있나, PID는?
+# [SSH 탭 2] ① 프로세스가 정말 있나, PID는?
 pgrep -a -f "^[^ ]*agent-app-linux"
 
-# ② 15034를 다른 프로그램이 차지하고 있나
+# [SSH 탭 2] ② 15034를 다른 프로그램이 차지하고 있나
 sudo ss -ltnp | grep 15034
 
-# ③ 앱에 준 포트 번호가 맞나
+# [SSH 탭 2] ③ 앱에 준 포트 번호가 맞나
 sudo grep AGENT_PORT /home/agent-admin/.bashrc
 
-# ④ 앱이 멈춰 있나 → 키워드: STAT이 T면 정지 상태
+# [SSH 탭 2] ④ 앱이 멈춰 있나 → 키워드: STAT이 T면 정지 상태
 ps -o pid,stat,etime,cmd -p $(pgrep -o -f "^[^ ]*agent-app-linux")
 ```
 
@@ -311,10 +321,10 @@ ps -o pid,stat,etime,cmd -p $(pgrep -o -f "^[^ ]*agent-app-linux")
 ![디스크 가득](images/disk_full.svg)
 
 ```bash
-# [탭 2] 디스크가 얼마나 찼나
+# [SSH 탭 2] 디스크가 얼마나 찼나
 df -h /
 
-# [탭 2] 어떤 로그가 큰가 → 키워드: agent_app.log가 monitor.log보다 훨씬 큼
+# [SSH 탭 2] 어떤 로그가 큰가 → 키워드: agent_app.log가 monitor.log보다 훨씬 큼
 sudo du -sh /var/log/agent-app/*
 ```
 
@@ -323,12 +333,12 @@ sudo du -sh /var/log/agent-app/*
 ## 끝나고 원래대로
 
 ```bash
-# 방화벽이 켜져 있나 (3-3에서 껐다면 sudo ufw enable)
+# [SSH 탭 2] 방화벽이 켜져 있나 (3-3에서 껐다면 sudo ufw enable)
 sudo ufw status
 
-# 앱이 켜져 있나 (비어 있으면 탭 1에서 ./agent-app-linux-x86)
+# [SSH 탭 2] 앱이 켜져 있나 (비어 있으면 탭 1에서 ./agent-app-linux-x86)
 pgrep -a -f "^[^ ]*agent-app-linux"
 
-# 3-4 시험 파일 지우기
+# [SSH 탭 2] 3-4 시험 파일 지우기
 rm -f /tmp/o /tmp/a
 ```

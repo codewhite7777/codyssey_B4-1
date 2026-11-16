@@ -68,11 +68,14 @@
 - `✔ 확인` 주석은 **설정이 실제로 적용됐는지 본 명령**이고, `결과:`는 그때 화면에 나온 핵심 내용입니다.
 - 증거 사진은 설명과 함께 **[수행내역서.md](수행내역서.md)** 한곳에 모았습니다. 각 단계 끝의 "📸 증거" 링크를 누르면 바로 갑니다.
 
-| 표시 | 어디서 실행 |
-|---|---|
-| `[Mac]` | Mac 터미널 |
-| 표시 없음 | VM, 내 계정 `arang` (sudo 가능) |
-| `[admin]` | VM, `sudo -iu agent-admin`으로 바꾼 창 (sudo 없음) |
+모든 명령 위 주석 맨 앞에 **어디서 치는지** 적었습니다. 치기 전에 **프롬프트**가 맞는지 보세요.
+
+| 표시 | 어디서 | 프롬프트 |
+|---|---|---|
+| `[MAC]` | Mac 터미널 (VM에 접속하기 전) | `codewhite77770105@cx2r6s7 ~ %` |
+| `[SSH]` | Mac에서 `ssh -p 20022`로 접속한 VM, 내 계정 arang | `arang@b4-1:~$` |
+| `[SSH: agent-admin]` | 위 VM에서 `sudo -iu agent-admin`으로 바꾼 뒤 | `agent-admin@b4-1:~$` |
+| `탭 1` · `탭 2` | 6단계부터 창이 2개: **탭 1** = 앱 실행 전용(agent-admin), **탭 2** = 나머지 작업(arang) | |
 
 > ⚠️ **명령은 한 줄(한 명령)씩 붙여넣으세요.** 여러 줄을 한꺼번에 붙여넣으면 `sudo`가 비밀번호를 물을 때 다음 줄이 비밀번호로 들어가거나, `sudo -iu agent-admin` 뒤의 줄이 엉뚱한 계정에서 실행됩니다. (`\`로 끝나는 줄은 다음 줄과 합쳐서 한 명령입니다.)
 
@@ -84,29 +87,32 @@ UTM으로 Ubuntu VM을 만들고([만드는 순서](#b-실습-환경-왜-utm-vm�
 > 1. **주소:** VM 화면에서 로그인 후 `ip -4 addr show`로 `192.168.64.x` 주소를 확인합니다. 예전 VM이 `.2`를 쓰고 있었다면 새 VM은 `.3`일 수 있습니다. 아래 명령의 `192.168.64.2`를 그 주소로 바꿔 씁니다.
 > 2. **접속 경고:** 같은 주소로 예전 VM에 접속한 적이 있으면 `REMOTE HOST IDENTIFICATION HAS CHANGED!`가 뜨며 접속이 막힙니다. VM을 새로 만들어 열쇠가 바뀐 것이라 정상입니다. Mac에서 예전 기록을 지우고 다시 접속합니다.
 >    ```bash
+>    # [MAC]
 >    ssh-keygen -R 192.168.64.2
 >    ssh-keygen -R "[192.168.64.2]:20022"
 >    ```
 
 ```bash
-# [Mac] VM에 접속 (1단계를 끝낸 VM이라 20022번 포트)
-ssh -p 20022 arang@192.168.64.2
-# 새 VM이라면 아직 기본 22번 포트:
-# ssh arang@192.168.64.2
-
-# [Mac] 제공 앱 파일을 VM의 내 홈 폴더로 복사 (scp는 포트 옵션이 대문자 -P)
+# [MAC] 제공 앱 파일을 VM의 내 홈 폴더로 복사 (scp는 포트 옵션이 대문자 -P)
+#   Mac에 있는 파일을 보내는 명령이라 꼭 Mac 프롬프트(…% )에서 칩니다
 scp -P 20022 ~/Downloads/agent-app/agent-app-linux-x86 arang@192.168.64.2:~/
 # 새 VM이라면:
 # scp ~/Downloads/agent-app/agent-app-linux-x86 arang@192.168.64.2:~/
 
-# 시간대를 한국 시간으로 (로그 시각이 맞도록)
+# [MAC] VM에 접속 (1단계를 끝낸 VM이라 20022번 포트)
+#   이 명령 뒤로는 프롬프트가 arang@b4-1:~$ 로 바뀜 = 여기부터 VM 안
+ssh -p 20022 arang@192.168.64.2
+# 새 VM이라면 아직 기본 22번 포트:
+# ssh arang@192.168.64.2
+
+# [SSH] 시간대를 한국 시간으로 (로그 시각이 맞도록)
 sudo timedatectl set-timezone Asia/Seoul
 
-# 이 저장소 받기 (monitor.sh, 설정 파일)
+# [SSH] 이 저장소 받기 (monitor.sh, 설정 파일)
 git clone https://github.com/codewhite7777/codyssey_B4-1.git
 cd ~/codyssey_B4-1
 
-# 필요한 프로그램 설치
+# [SSH] 필요한 프로그램 설치
 sudo apt update
 sudo apt install -y openssh-server ufw acl cron logrotate
 ```
@@ -123,36 +129,36 @@ SSH 설정 파일 `/etc/ssh/sshd_config`에서 **두 줄을 바꿉니다.**
 ![SSH 위협 모델](images/ssh.svg)
 
 ```bash
-# 원본 설정 파일 백업 (잘못되면 되돌리기용)
+# [SSH] 원본 설정 파일 백업 (잘못되면 되돌리기용)
 sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
 
-# [변경 1] "#Port 22" 줄 → "Port 20022"
+# [SSH] [변경 1] "#Port 22" 줄 → "Port 20022"
 #   ^#\? = 앞에 주석 표시(#)가 있어도 없어도 찾음
 sudo sed -i 's/^#\?Port .*/Port 20022/' /etc/ssh/sshd_config
 
-# [변경 2] "#PermitRootLogin ..." 줄 → "PermitRootLogin no"
+# [SSH] [변경 2] "#PermitRootLogin ..." 줄 → "PermitRootLogin no"
 sudo sed -i 's/^#\?PermitRootLogin .*/PermitRootLogin no/' \
     /etc/ssh/sshd_config
 
-# 바뀐 두 줄 확인 → 결과: Port 20022 / PermitRootLogin no
+# [SSH] 바뀐 두 줄 확인 → 결과: Port 20022 / PermitRootLogin no
 grep -nE "^Port|^PermitRootLogin" /etc/ssh/sshd_config
 
-# 문법 검사(-t) 후 이상 없으면 SSH 재시작 → 새 설정 적용
+# [SSH] 문법 검사(-t) 후 이상 없으면 SSH 재시작 → 새 설정 적용
 #   (지금 접속한 창은 닫지 않음: 실수해도 이 창으로 고칠 수 있게)
 sudo sshd -t && sudo systemctl restart ssh
 
-# [Mac] 새 탭에서 새 포트로 접속되는지 먼저 확인
+# [MAC] 새 탭에서 새 포트로 접속되는지 먼저 확인
 ssh -p 20022 arang@192.168.64.2
 
-# ✔ 확인: 포트·root 설정이 실제로 적용됐나 (📸 1-1)
+# [SSH] ✔ 확인: 포트·root 설정이 실제로 적용됐나 (📸 1-1)
 #   결과: port 20022 / permitrootlogin no
 sudo sshd -T | grep -E "^port |^permitrootlogin "
 
-# ✔ 확인: 20022번 문이 실제로 열렸나 (📸 1-2)
+# [SSH] ✔ 확인: 20022번 문이 실제로 열렸나 (📸 1-2)
 #   결과: 0.0.0.0:20022 ... LISTEN ... "sshd"
 sudo ss -tlnp | grep sshd
 
-# ✔ 확인: [Mac] root 접속이 실제로 막혔나 (📸 1-3)
+# [MAC] ✔ 확인: root 접속이 실제로 막혔나 (📸 1-3)
 #   결과: Permission denied
 ssh -p 20022 root@192.168.64.2
 ```
@@ -169,21 +175,21 @@ ssh -p 20022 root@192.168.64.2
 ![방화벽](images/firewall.svg)
 
 ```bash
-# 기본 규칙: 들어오는 연결은 전부 거절, 나가는 연결은 허용
+# [SSH] 기본 규칙: 들어오는 연결은 전부 거절, 나가는 연결은 허용
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 
-# 허용 명단: 20022 = 내가 SSH로 들어오는 문, 15034 = 앱이 쓰는 문
+# [SSH] 허용 명단: 20022 = 내가 SSH로 들어오는 문, 15034 = 앱이 쓰는 문
 sudo ufw allow 20022/tcp
 sudo ufw allow 15034/tcp
 
-# 켜기 전에 명단 확인 (20022가 꼭 있어야 SSH가 안 끊김)
+# [SSH] 켜기 전에 명단 확인 (20022가 꼭 있어야 SSH가 안 끊김)
 sudo ufw show added
 
-# 방화벽 켜기 (y 입력, 재부팅해도 켜진 상태 유지)
+# [SSH] 방화벽 켜기 (y 입력, 재부팅해도 켜진 상태 유지)
 sudo ufw enable
 
-# ✔ 확인: 방화벽 상태 (📸 2)
+# [SSH] ✔ 확인: 방화벽 상태 (📸 2)
 #   결과: Status: active / deny (incoming) / 20022/tcp, 15034/tcp만
 sudo ufw status verbose
 ```
@@ -197,22 +203,22 @@ sudo ufw status verbose
 ![계정과 그룹](images/users_groups.svg)
 
 ```bash
-# 계정 3개 만들기 (-m 홈 폴더 생성, -s 기본 셸 bash)
+# [SSH] 계정 3개 만들기 (-m 홈 폴더 생성, -s 기본 셸 bash)
 sudo useradd -m -s /bin/bash agent-admin
 sudo useradd -m -s /bin/bash agent-dev
 sudo useradd -m -s /bin/bash agent-test
 
-# 그룹 2개 만들기 (common = 공용, core = 핵심)
+# [SSH] 그룹 2개 만들기 (common = 공용, core = 핵심)
 sudo groupadd agent-common
 sudo groupadd agent-core
 
-# 그룹에 넣기 (-aG = 기존 그룹은 그대로 두고 추가)
+# [SSH] 그룹에 넣기 (-aG = 기존 그룹은 그대로 두고 추가)
 #   admin, dev → common + core / test → common만
 sudo usermod -aG agent-common,agent-core agent-admin
 sudo usermod -aG agent-common,agent-core agent-dev
 sudo usermod -aG agent-common agent-test
 
-# ✔ 확인: 계정별 그룹 (📸 3)
+# [SSH] ✔ 확인: 계정별 그룹 (📸 3)
 #   결과: admin·dev = agent-common, agent-core / test = agent-common만
 id agent-admin; id agent-dev; id agent-test
 ```
@@ -241,16 +247,16 @@ id agent-admin; id agent-dev; id agent-test
 | `/var/log/agent-app` | agent-admin:agent-core | `2770` + 기본 ACL | admin · dev만 |
 
 ```bash
-# 긴 경로를 H로 줄여 씀
+# [SSH] 긴 경로를 H로 줄여 씀
 H=/home/agent-admin/agent-app
 
-# 폴더 4개 만들기 (처음엔 주인이 root)
+# [SSH] 폴더 4개 만들기 (처음엔 주인이 root)
 sudo mkdir -p $H/upload_files $H/api_keys $H/bin /var/log/agent-app
 
-# 홈 폴더(750)는 남이 못 들어감 → common에게 "지나가기(x)"만 허용
+# [SSH] 홈 폴더(750)는 남이 못 들어감 → common에게 "지나가기(x)"만 허용
 sudo setfacl -m g:agent-common:x /home/agent-admin
 
-# 주인:그룹 바꾸고(chown) 권한 숫자 정하기(chmod)
+# [SSH] 주인:그룹 바꾸고(chown) 권한 숫자 정하기(chmod)
 #   750  = 주인 rwx, 그룹 r-x, 나머지 없음
 #   2770 = setgid + 주인 rwx, 그룹 rwx, 나머지 없음
 sudo chown agent-admin:agent-common $H
@@ -264,20 +270,20 @@ sudo chmod 750 $H/bin
 sudo chown agent-admin:agent-core /var/log/agent-app
 sudo chmod 2770 /var/log/agent-app
 
-# 기본 ACL: 앞으로 생길 파일도 그룹이 읽기·쓰기 가능하게
+# [SSH] 기본 ACL: 앞으로 생길 파일도 그룹이 읽기·쓰기 가능하게
 sudo setfacl -d -m g:agent-common:rwx $H/upload_files
 sudo setfacl -d -m g:agent-core:rw /var/log/agent-app
 
-# 폴더 5개 한눈에 (📸 4-1) → 결과: 위 표와 같은 주인·그룹·권한
+# [SSH] 폴더 5개 한눈에 (📸 4-1) → 결과: 위 표와 같은 주인·그룹·권한
 sudo ls -ld $H $H/upload_files $H/api_keys $H/bin /var/log/agent-app
 
-# 공용 폴더에 test가 쓰기 → 결과: 에러 없이 성공
+# [SSH] 공용 폴더에 test가 쓰기 → 결과: 에러 없이 성공
 sudo -u agent-test touch $H/upload_files/from-test.txt
 
-# ✔ 확인: test는 비밀 폴더 거절 (📸 4-2) → 결과: Permission denied
+# [SSH] ✔ 확인: test는 비밀 폴더 거절 (📸 4-2) → 결과: Permission denied
 sudo -u agent-test ls $H/api_keys
 
-# ✔ 확인: dev는 비밀 폴더 통과 (📸 4-3)
+# [SSH] ✔ 확인: dev는 비밀 폴더 통과 (📸 4-3)
 #   결과: 목록이 보임 (키 파일은 5단계에서 만들어서 아직 . 과 .. 만)
 sudo -u agent-dev ls -la $H/api_keys
 ```
@@ -295,10 +301,10 @@ sudo -u agent-dev ls -la $H/api_keys
 ![환경변수와 Boot](images/env_boot.svg)
 
 ```bash
-# agent-admin으로 바꾸기 (프롬프트가 agent-admin@b4-1로 바뀜)
+# [SSH] agent-admin으로 바꾸기 (프롬프트가 agent-admin@b4-1로 바뀜)
 sudo -iu agent-admin
 
-# [admin] 환경변수 5개를 ~/.bashrc 끝에 추가 (로그인할 때마다 적용)
+# [SSH: agent-admin] 환경변수 5개를 ~/.bashrc 끝에 추가 (로그인할 때마다 적용)
 cat >> ~/.bashrc <<'EOF'
 export AGENT_HOME=/home/agent-admin/agent-app
 export AGENT_PORT=15034
@@ -307,20 +313,20 @@ export AGENT_KEY_PATH=$AGENT_HOME/api_keys
 export AGENT_LOG_DIR=/var/log/agent-app
 EOF
 
-# [admin] 지금 창에 바로 적용
+# [SSH: agent-admin] 지금 창에 바로 적용
 source ~/.bashrc
 
-# [admin] 환경변수 확인 (📸 5-1) → 결과: AGENT_ 5개, KEY_PATH는 폴더
+# [SSH: agent-admin] 환경변수 확인 (📸 5-1) → 결과: AGENT_ 5개, KEY_PATH는 폴더
 env | grep ^AGENT_ | sort
 
-# [admin] 키 파일: 앱이 읽는 secret.key + 과제 문서의 t_secret.key
+# [SSH: agent-admin] 키 파일: 앱이 읽는 secret.key + 과제 문서의 t_secret.key
 echo "agent_api_key_test" > $AGENT_KEY_PATH/secret.key
 echo "agent_api_key_test" > $AGENT_KEY_PATH/t_secret.key
 
-# [admin] 키 파일 권한 660 (주인·그룹만 읽기·쓰기)
+# [SSH: agent-admin] 키 파일 권한 660 (주인·그룹만 읽기·쓰기)
 chmod 660 $AGENT_KEY_PATH/*.key
 
-# [admin] 확인 (📸 5-2) → 결과: -rw-rw---- agent-admin agent-core
+# [SSH: agent-admin] 확인 (📸 5-2) → 결과: -rw-rw---- agent-admin agent-core
 #   그룹이 agent-core인 건 폴더의 setgid 덕분
 ls -l $AGENT_KEY_PATH
 ```
@@ -341,22 +347,25 @@ ls -l $AGENT_KEY_PATH
 제공 앱을 **일반 계정(agent-admin)**으로 실행하면 1~5단계 세팅을 앱이 5가지로 검사합니다. 통과하면 15034를 열고 일부러 CPU · 메모리를 썼다 줄였다 합니다. ([제공 앱 분석](#a-제공-앱은-무엇인가))
 
 ```bash
-# [admin] arang으로 돌아가기
+# [SSH 탭 1: agent-admin] arang으로 돌아가기
 exit
 
-# 앱 파일을 AGENT_HOME으로 복사 + 주인 agent-admin + 권한 750
+# [SSH 탭 1] 앱 파일을 AGENT_HOME으로 복사 + 주인 agent-admin + 권한 750
 sudo install -o agent-admin -g agent-admin -m 750 \
     ~/agent-app-linux-x86 /home/agent-admin/agent-app/
 
-# agent-admin으로 바꾸고 AGENT_HOME으로 이동
+# [SSH 탭 1] agent-admin으로 바꾸기
 sudo -iu agent-admin
+
+# [SSH 탭 1: agent-admin] AGENT_HOME(앱 폴더)으로 이동
 cd $AGENT_HOME
 
-# ✔ 확인: [admin] 앱 실행 (📸 6) → 이 창(탭 1)은 앱 전용, 종료는 Ctrl+C
+# [SSH 탭 1: agent-admin] ✔ 확인: 앱 실행 (📸 6)
+#   이 창(탭 1)은 앱 전용, 종료는 Ctrl+C
 #   결과: [1/5]~[5/5] [OK] → All Boot Checks Passed! → Agent READY
 ./agent-app-linux-x86
 
-# ✔ 확인: [Mac에서 새 탭으로 접속한 arang 창 = 탭 2] (📸 6-2)
+# [SSH 탭 2] ✔ 확인: 탭 2(Mac에서 ⌘T로 새 탭을 열고 ssh 접속)에서 (📸 6-2)
 #   결과: 0.0.0.0:15034 ... LISTEN ... "agent-app-linux"
 sudo ss -ltnp | grep 15034
 ```
@@ -372,44 +381,45 @@ sudo ss -ltnp | grep 15034
 ![monitor.sh 순서도](images/monitor_flow.svg)
 
 ```bash
+# [SSH 탭 2]
 cd ~/codyssey_B4-1
 
-# monitor.sh 설치: 복사 + 주인 agent-dev + 그룹 agent-core + 권한 750
+# [SSH 탭 2] monitor.sh 설치: 복사 + 주인 agent-dev + 그룹 agent-core + 권한 750
 sudo install -o agent-dev -g agent-core -m 750 \
     bin/monitor.sh /home/agent-admin/agent-app/bin/monitor.sh
 
-# ✔ 확인: 설치 결과 (📸 7-1)
+# [SSH 탭 2] ✔ 확인: 설치 결과 (📸 7-1)
 #   결과: -rwxr-x--- agent-dev agent-core monitor.sh
 sudo ls -l /home/agent-admin/agent-app/bin
 
-# agent-core에게 "ufw status" 한 명령만 sudo 허용 (방화벽 확인용)
+# [SSH 탭 2] agent-core에게 "ufw status" 한 명령만 sudo 허용 (방화벽 확인용)
 sudo install -o root -g root -m 0440 \
     config/sudoers-agent-monitor /etc/sudoers.d/agent-monitor
 
-# sudoers 문법 검사 → 결과: parsed OK
+# [SSH 탭 2] sudoers 문법 검사 → 결과: parsed OK
 sudo visudo -cf /etc/sudoers.d/agent-monitor
 
-# ✔ 확인: 정상일 때 (📸 7-2)
+# [SSH 탭 2] ✔ 확인: 정상일 때 (📸 7-2)
 #   결과: [OK] 3개, CPU·MEM·DISK 출력, MEM 경고가 떠도 exit=0
 sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh
 echo "exit=$?"
 
-# ✔ 확인: 방화벽을 잠깐 끄고 실행 (📸 7-3)
+# [SSH 탭 2] ✔ 확인: 방화벽을 잠깐 끄고 실행 (📸 7-3)
 #   결과: [WARNING] Firewall (ufw) is not active, 기록까지 하고 exit=0
 sudo ufw disable
 sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh
 echo "exit=$?"
 
-# 방화벽 다시 켜기 (y)
+# [SSH 탭 2] 방화벽 다시 켜기 (y)
 sudo ufw enable
 
-# ✔ 확인: 앱이 죽었을 때 (📸 7-4)
+# [SSH 탭 1: agent-admin] ✔ 확인: 앱이 죽었을 때 (📸 7-4)
 #   탭 1에서 Ctrl+C로 앱을 끄고, 탭 1(agent-admin)에서 sudo 없이 실행
 #   결과: [FAIL] not running, exit=1
 /home/agent-admin/agent-app/bin/monitor.sh
 echo "exit=$?"
 
-# [admin] 앱 다시 켜기 (8단계에서 cron이 정상 기록을 쌓도록)
+# [SSH 탭 1: agent-admin] 앱 다시 켜기 (8단계에서 cron이 정상 기록을 쌓도록)
 ./agent-app-linux-x86
 ```
 
@@ -446,33 +456,33 @@ echo "exit=$?"
 ![cron과 logrotate](images/cron_logrotate.svg)
 
 ```bash
-# 탭 1은 앱이 쓰고 있으므로 탭 2에서 agent-admin으로 잠깐 바꿈
+# [SSH 탭 2] 탭 1은 앱이 쓰고 있으므로 탭 2에서 agent-admin으로 잠깐 바꿈
 sudo -iu agent-admin
 
-# [admin] agent-admin 본인의 crontab에 "1분마다 monitor.sh" 등록
+# [SSH 탭 2: agent-admin] agent-admin 본인의 crontab에 "1분마다 monitor.sh" 등록
 #   > /dev/null 2>&1 = 화면 출력은 버림 (기록은 monitor.sh가 직접 함)
 echo "* * * * * /home/agent-admin/agent-app/bin/monitor.sh > /dev/null 2>&1" \
     | crontab -
 
-# [admin] arang으로 돌아가기 (저장소 폴더로 돌아옴)
+# [SSH 탭 2: agent-admin] arang으로 돌아가기 (저장소 폴더로 돌아옴)
 exit
 
-# ✔ 확인: crontab 확인 (📸 8-1)
+# [SSH 탭 2] ✔ 확인: crontab 확인 (📸 8-1)
 #   결과: * * * * * /home/agent-admin/agent-app/bin/monitor.sh ...
 sudo crontab -u agent-admin -l
 
-# ✔ 확인: 로그가 매분 저절로 쌓이나 (📸 8-2) → 등록 후 2~3분 기다린 뒤
+# [SSH 탭 2] ✔ 확인: 로그가 매분 저절로 쌓이나 (📸 8-2) → 등록 후 2~3분 기다린 뒤
 #   (앱이 켜져 있어야 쌓임)
 #   결과: [시각] PID:.. CPU:..% MEM:..% DISK_USED:..% 줄이 1분 간격
 sudo tail /var/log/agent-app/monitor.log
 
-# logrotate 설정 설치 (10MB / 10개)
+# [SSH 탭 2] logrotate 설정 설치 (10MB / 10개)
 sudo cp config/logrotate-agent-app /etc/logrotate.d/agent-app
 
-# ✔ 확인: 설치된 설정 (📸 8-3) → 결과: size 10M / rotate 10
+# [SSH 탭 2] ✔ 확인: 설치된 설정 (📸 8-3) → 결과: size 10M / rotate 10
 cat /etc/logrotate.d/agent-app
 
-# ✔ 확인: 판단만 해 보기, -d = 실제로 자르지 않음 (📸 8-4)
+# [SSH 탭 2] ✔ 확인: 판단만 해 보기, -d = 실제로 자르지 않음 (📸 8-4)
 #   결과: 10485760 bytes (10 rotations), log does not need rotating
 sudo logrotate -d /etc/logrotate.d/agent-app
 ```
