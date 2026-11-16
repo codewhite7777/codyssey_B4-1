@@ -387,7 +387,13 @@ sudo -u agent-dev ls -la $H/api_keys
 # [SSH] agent-admin으로 바꾸기 (프롬프트가 agent-admin@b4-1로 바뀜)
 sudo -iu agent-admin
 
+# [SSH: agent-admin] 먼저 이미 들어 있는지 확인
+#   결과가 0이면 바로 아래 cat 명령 실행, 5 이상이면 이미 했으니 건너뛰기
+#   (cat >> 는 칠 때마다 같은 5줄이 또 붙음)
+grep -c "^export AGENT_" ~/.bashrc
+
 # [SSH: agent-admin] 환경변수 5개를 ~/.bashrc 끝에 추가 (로그인할 때마다 적용)
+#   cat 줄부터 EOF 줄까지 7줄이 한 명령 → 이 7줄만 한 번에 붙여넣기
 cat >> ~/.bashrc <<'EOF'
 export AGENT_HOME=/home/agent-admin/agent-app
 export AGENT_PORT=15034
@@ -421,6 +427,10 @@ ls -l $AGENT_KEY_PATH
 | `AGENT_KEY_PATH` | `$AGENT_HOME/api_keys/t_secret.key` (파일) | `$AGENT_HOME/api_keys` (**폴더**) | `[2/5] FAIL` Key Path Mismatch |
 | 키 파일 이름 | `t_secret.key` | `secret.key` | `[3/5] FAIL` Missing File: secret.key |
 
+- **`~/.bashrc`에 같은 줄이 여러 번 들어갔거나 엉뚱한 줄이 섞였다면** (`sudo -iu agent-admin` 할 때 `Command '...' not found`가 뜸)
+  1. `[SSH: agent-admin]` `cp ~/.bashrc ~/.bashrc.bak` 으로 백업
+  2. `[SSH: agent-admin]` `grep -n "AGENT_" ~/.bashrc` 로 줄 번호 확인 (엉뚱한 줄은 오류에 나온 단어로 찾음)
+  3. `[SSH: agent-admin]` 첫 묶음 5줄만 남기고 `sed -i '시작,끝d' ~/.bashrc` 로 나머지 줄 삭제 (예: `sed -i '125,146d' ~/.bashrc`)
 - **cron에서는 환경변수가 비어 있습니다.** Ubuntu의 `~/.bashrc`는 사람이 직접 쓰는 셸이 아니면 읽지 않습니다. 그래서 monitor.sh는 `${AGENT_PORT:-15034}`처럼 기본값을 둡니다.
 
 📸 증거: [5-1](수행내역서.md#5-1-환경변수-5개) · [5-2](수행내역서.md#5-2-키-파일-권한)
