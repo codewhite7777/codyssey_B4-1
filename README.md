@@ -146,8 +146,10 @@ ssh -p 20022 arang@192.168.64.2
 sudo timedatectl set-timezone Asia/Seoul
 
 # [SSH] 이 저장소 받기 (monitor.sh, 설정 파일)
+#   이미 받았다면 already exists가 뜸 → 아래 cd 후 git pull 로 최신화
 git clone https://github.com/codewhite7777/codyssey_B4-1.git
 cd ~/codyssey_B4-1
+# git pull
 
 # [SSH] 필요한 프로그램 설치
 sudo apt update
@@ -427,10 +429,30 @@ ls -l $AGENT_KEY_PATH
 | `AGENT_KEY_PATH` | `$AGENT_HOME/api_keys/t_secret.key` (파일) | `$AGENT_HOME/api_keys` (**폴더**) | `[2/5] FAIL` Key Path Mismatch |
 | 키 파일 이름 | `t_secret.key` | `secret.key` | `[3/5] FAIL` Missing File: secret.key |
 
-- **`~/.bashrc`에 같은 줄이 여러 번 들어갔거나 엉뚱한 줄이 섞였다면** (`sudo -iu agent-admin` 할 때 `Command '...' not found`가 뜸)
-  1. `[SSH: agent-admin]` `cp ~/.bashrc ~/.bashrc.bak` 으로 백업
-  2. `[SSH: agent-admin]` `grep -n "AGENT_" ~/.bashrc` 로 줄 번호 확인 (엉뚱한 줄은 오류에 나온 단어로 찾음)
-  3. `[SSH: agent-admin]` 첫 묶음 5줄만 남기고 `sed -i '시작,끝d' ~/.bashrc` 로 나머지 줄 삭제 (예: `sed -i '125,146d' ~/.bashrc`)
+**문제가 생겼을 때: `~/.bashrc`에 같은 줄이 여러 번 들어갔거나 엉뚱한 줄이 섞였다면**
+
+증상: `sudo -iu agent-admin` 이나 `source ~/.bashrc` 할 때 `Command 'Please' not found`처럼 없는 명령 오류가 뜸. 원인: `cat >>` 를 여러 번 쳤거나, 붙여넣을 때 다른 글자가 딸려 들어감.
+
+```bash
+# [SSH: agent-admin] 고치기 전에 백업
+cp ~/.bashrc ~/.bashrc.bak
+
+# [SSH: agent-admin] 환경변수 줄과 엉뚱한 줄이 몇 번째 줄인지 확인
+#   "Please" 자리에는 오류에 나온 단어를 넣음
+grep -n "AGENT_\|Please" ~/.bashrc
+
+# [SSH: agent-admin] 첫 묶음 5줄만 남기고 나머지 줄 삭제
+#   '시작,끝d' = 시작~끝 번째 줄 삭제. 아래는 예시이니 위 결과의 번호로 바꿈
+#   (예: 120~124가 첫 묶음, 125~146이 중복·엉뚱한 줄일 때)
+sed -i '125,146d' ~/.bashrc
+
+# [SSH: agent-admin] 다시 확인 → 결과: export AGENT_ 5줄만 남음
+grep -n "AGENT_\|Please" ~/.bashrc
+
+# [SSH: agent-admin] 다시 적용 → 결과: 오류 메시지 없음
+source ~/.bashrc
+```
+
 - **cron에서는 환경변수가 비어 있습니다.** Ubuntu의 `~/.bashrc`는 사람이 직접 쓰는 셸이 아니면 읽지 않습니다. 그래서 monitor.sh는 `${AGENT_PORT:-15034}`처럼 기본값을 둡니다.
 
 📸 증거: [5-1](수행내역서.md#5-1-환경변수-5개) · [5-2](수행내역서.md#5-2-키-파일-권한)
