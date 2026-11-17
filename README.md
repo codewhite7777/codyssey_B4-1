@@ -385,8 +385,48 @@ sudo -u agent-dev ls -la $H/api_keys
 
 ![환경변수와 Boot](images/env_boot.svg)
 
+#### 평가 시연: 환경변수를 지우고 시작하기 (평가마다 처음에 한 번)
+
+평가를 여러 번 받으므로, 시작할 때 환경변수를 지워서 **설정 안 됐을 때 → 설정됐을 때**를 차례로 보여 줍니다.
+
+| | 설정 안 됐을 때 | 설정됐을 때 |
+|---|---|---|
+| `env \| grep ^AGENT_` | 아무것도 안 나옴 | `AGENT_` 5줄 |
+| 앱 실행 | `[2/5] [FAIL]` `Critical Env 'AGENT_HOME' is missing.` → 바로 종료 | `[1/5]`~`[5/5]` `[OK]` → `Agent READY` |
+
+> 탭 1에서 앱이 돌고 있다면 먼저 **Ctrl+C로 끕니다**(6단계에서 다시 켬). 키 파일은 지우지 않습니다. 아래 명령으로 다시 만들어도 같은 내용으로 덮어써집니다.
+
 ```bash
 # [SSH] agent-admin으로 바꾸기 (프롬프트가 agent-admin@b4-1로 바뀜)
+sudo -iu agent-admin
+
+# [SSH: agent-admin] 지금 상태 보기 → 결과: AGENT_ 5줄 (설정된 상태)
+env | grep ^AGENT_ | sort
+
+# [SSH: agent-admin] ~/.bashrc에서 환경변수 줄 지우기
+#   '/^export AGENT_/d' = "export AGENT_"로 시작하는 줄을 모두 삭제(d)
+sed -i '/^export AGENT_/d' ~/.bashrc
+
+# [SSH: agent-admin] 지금 창에 남아 있는 값도 지우기 (unset = 변수 삭제)
+unset AGENT_HOME AGENT_PORT AGENT_UPLOAD_DIR AGENT_KEY_PATH AGENT_LOG_DIR
+
+# [SSH: agent-admin] ✔ 확인: 지워졌나 → 결과: 아무것도 안 나옴
+env | grep ^AGENT_
+
+# [SSH: agent-admin] ✔ 확인: 설정 안 됐을 때 앱 실행
+#   결과: [1/5] [OK] → [2/5] [FAIL] Critical Env 'AGENT_HOME' is missing.
+#   Traceback(파이썬 오류)도 같이 나오는데 제공 앱 자체의 버그라 무시
+#   ($AGENT_HOME이 비어 있어서 전체 경로로 실행)
+/home/agent-admin/agent-app/agent-app-linux-x86
+```
+
+이어서 아래 명령으로 환경변수를 다시 설정하고, 6단계에서 앱을 실행하면 `[OK]` 5개가 나옵니다(설정됐을 때).
+
+#### 환경변수 설정
+
+```bash
+# [SSH] agent-admin으로 바꾸기 (프롬프트가 agent-admin@b4-1로 바뀜)
+#   위 시연에서 이미 agent-admin이면 건너뜀 (agent-admin은 sudo가 안 됨)
 sudo -iu agent-admin
 
 # [SSH: agent-admin] 먼저 이미 들어 있는지 확인
